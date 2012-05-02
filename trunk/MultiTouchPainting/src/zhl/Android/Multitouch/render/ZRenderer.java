@@ -142,7 +142,7 @@ public class ZRenderer implements GLSurfaceView.Renderer {
 		gl.glPopMatrix();
 	}
 	
-	private void draw3DObjects(GL10 gl) {
+	synchronized private void draw3DObjects(GL10 gl) {
 		//ZMesh mesh = ZDataManager.getDataManager_().getSimpleMesh_();
 		meshRenderer_.draw(gl);
 	}
@@ -248,11 +248,13 @@ public class ZRenderer implements GLSurfaceView.Renderer {
 		gl.glLoadIdentity();
 		gl.glDisable(GL10.GL_CULL_FACE);
 		gl.glDisable(GL10.GL_DEPTH_TEST);
+		gl.glDisable(GL10.GL_LIGHTING);
 	}
 	
 	public void end2DRendering(GL10 gl) {
 		gl.glEnable(GL10.GL_CULL_FACE);
 		gl.glEnable(GL10.GL_DEPTH_TEST);
+		gl.glEnable(GL10.GL_LIGHTING);
 		gl.glMatrixMode(GL10.GL_MODELVIEW);
 		gl.glPopMatrix();
 		gl.glMatrixMode(GL10.GL_PROJECTION);

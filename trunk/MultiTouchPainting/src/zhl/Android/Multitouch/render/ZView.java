@@ -66,7 +66,7 @@ public class ZView extends GLSurfaceView {
 		// prepare renderer
 		setViewRenderer(new ZRenderer(this));
 		setRenderer(getRenderer());	
-		getRenderer().addData(ZDataManager.getDataManager().getAllObject3D());
+		updateRenderData();
 	}
 	
 //	private void init() {
@@ -78,25 +78,10 @@ public class ZView extends GLSurfaceView {
 	}
 	
 	public void initMesh() throws FileNotFoundException, IOException {
-		//ZMeshGroup meshGroup = ZDataManager.getDataManager_().getMeshGroup();
-		//meshGroup.addMesh(ZMesh.buildSimpleMesh());
-		//meshGroup.addMesh(new ZCube(2.f, 1.f, 3.f));
-		ZMesh mesh = new ZMesh();
-		mesh.load("/sdcard/01.obj");
-		//mesh.load("/sdcard/02.obj");
-		mesh.buildAxes();
-		//meshGroup.addMesh(mesh);
-		ZDataManager.getDataManager().getAllObject3D().add(mesh);
-		ZMesh mesh2 = new ZMesh();
-		mesh2.load("/sdcard/02.obj");
-		mesh2.buildAxes();
-		Matrix4f trans = Matrix4f.identityMatrix();
-		trans.set(0, 3, 0.5f);
-		mesh2.applyTransformation(trans);
-		ZDataManager.getDataManager().getAllObject3D().add(mesh2);
-//		ZDataManager.getDataManager().getAllObject3D().add(new ZCube(2.f, 1.f, 3.f));
-//		ZAxis xAxis = new ZAxis(new Vector3f(0.f,0.f,0.f), new Vector3f(1.f,0.f,0.f), ZColor.colorRed, ZAxis.AxisType.ScreenAxis);
-//		ZDataManager.getDataManager().getAllObject3D().add(xAxis);
+		//ZDataManager.getDataManager().addMesh(ZMesh.strNameSphere);
+		//ZDataManager.getDataManager().addMesh(ZMesh.strName01);
+		ZDataManager.getDataManager().addMesh(ZMesh.strNameCone);
+		
 		Log.d(LOG_TAG, "Mesh initialized.");
 	}
 
@@ -173,4 +158,7 @@ public class ZView extends GLSurfaceView {
 		this.renderer_ = renderer_;
 	}
 
+	public void updateRenderData() {
+		getRenderer().addData(ZDataManager.getDataManager().getAllObject3D());
+	}
 }

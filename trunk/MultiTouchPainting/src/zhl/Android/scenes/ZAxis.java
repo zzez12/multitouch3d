@@ -130,12 +130,14 @@ public class ZAxis extends ZObject3D{
 		//getGLStatus(gl);
 		//gl.glLineWidth(8.f);
 		
+		gl.glDisable(GL10.GL_LIGHTING);
 		if (this.isVisable()) {
 			gl.glLineWidthx(8);	// unsupported by HTC DesireHD!!
 			gl.glDrawElements(GL10.GL_LINE_STRIP, 5, GL10.GL_UNSIGNED_SHORT, indicesBuffer_);
 			gl.glPointSize(10.f);
 			gl.glDrawElements(GL10.GL_POINTS, 5, GL10.GL_UNSIGNED_SHORT, indicesBuffer_);
 		}
+		gl.glEnable(GL10.GL_LIGHTING); 
 	}
 	
 	public void drawEx(GL10 gl) {
@@ -149,9 +151,19 @@ public class ZAxis extends ZObject3D{
 			gl.glDrawElements(GL10.GL_POINTS, 5, GL10.GL_UNSIGNED_SHORT, indicesBuffer_);
 		}
 	}
-	
+
+	/*
+	 * return the input ori position
+	 */
 	public Vector3f getOri() {
 		return oriP_;
+	}
+	
+	/*
+	 * return the transformed ori position
+	 */
+	public Vector3f getCurrentOri(boolean bWithTmpTrans) {
+		return getCurrentVector(getOri(), bWithTmpTrans, false);
 	}
 
 	public void setOri(Vector3f oriP_) {
@@ -160,6 +172,10 @@ public class ZAxis extends ZObject3D{
 
 	public Vector3f getDir() {
 		return dirP_;
+	}
+	
+	public Vector3f getCurrentDir(boolean bWithTmpTrans) {
+		return getCurrentVector(getDir(), bWithTmpTrans, true); 
 	}
 
 	public void setDir(Vector3f dirP_) {

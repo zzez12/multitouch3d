@@ -16,7 +16,7 @@ public class ZMeshRenderer {
 	
 	private Vector<Object> toRenderObjs = new Vector<Object>();
 	
-	public void draw(GL10 gl) {
+	synchronized public void draw(GL10 gl) {
 		int count = 0;
 		for (Object obj:getToRenderObjs()) {
 			if (obj instanceof ZObject3D) {
@@ -29,7 +29,8 @@ public class ZMeshRenderer {
 	}
 	
 	public void addMesh(Object obj) {
-		getToRenderObjs().add(obj);
+		if (!hasMesh(obj))
+			getToRenderObjs().add(obj);
 	}
 	
 	public boolean hasMesh(Object o) {

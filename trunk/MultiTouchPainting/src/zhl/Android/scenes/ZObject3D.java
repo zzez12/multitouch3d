@@ -15,8 +15,9 @@ import zhl.Android.Multitouch.render.ZView.EnumOperationMode;
 import zhl.Android.math.Matrix4f;
 import zhl.Android.math.Vector2f;
 import zhl.Android.math.Vector3f;
+import zhl.Android.math.Vector4f;
 
-abstract public class ZObject3D implements ZPickable3D, ZDrawable3D {
+abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 	public static final String LOG_TAG = ZObject3D.class.getSimpleName();
 	
 	private String name_ = ZObject3D.class.getSimpleName();
@@ -51,6 +52,9 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable3D {
 	abstract public boolean pick(ZProjector proj, float x, float y);
 	abstract public void prepareBuffers();
 	
+	ZObject3D() {
+		this.parentObject_ = null;
+	}
 	
 	public void addChildObject(ZObject3D obj) {
 		this.getChildObjects().add(obj);
@@ -73,8 +77,20 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable3D {
 	}
 	//////////////////////////////////////////////
 	
+	public void endTransformation() {
+		//this.transformation_ = this.transformation_.multiply(this.tmpTransformation_);
+		this.transformation_ = this.tmpTransformation_.multiply(this.transformation_);
+		this.tmpTransformation_ = Matrix4f.identityMatrix();
+	}
+	
+	public void resetTransformation() {
+		this.transformation_ = Matrix4f.identityMatrix();
+		this.tmpTransformation_ = Matrix4f.identityMatrix();
+	}
+	
 	public void applyTransformation(Matrix4f tran) {
 		this.transformation_ = tran;
+//		this.tmpTransformation_ = Matrix4f.identityMatrix();
 //		for (ZObject3D obj:getChildObjects()) {
 //			obj.applyTransformation(tran);
 //		}
@@ -82,7 +98,8 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable3D {
 	
 	public Matrix4f getTransformation() {
 		//Matrix4f ret = Matrix4f.identityMatrix();
-		return transformation_.multiply(getTmpTransformation());
+		//return transformation_.multiply(getTmpTransformation()); 
+		return getTmpTransformation().multiply(transformation_);
 	}
 	
 	public Matrix4f getWorldTransformation() {
@@ -90,6 +107,13 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable3D {
 			return getTransformation();
 		else
 			return this.parentObject_.getTransformation().multiply(getTransformation());
+	}
+	
+	public Matrix4f getCurrentTransformation() {
+		if (this.parentObject_==null)
+			return transformation_;
+		else
+			return this.parentObject_.transformation_.multiply(transformation_);
 	}
 	
 	public void setVertices(float [] vertices) {
@@ -349,6 +373,24 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable3D {
 		return tmpTransformation_;
 	}
 	public void setTmpTransformation(Matrix4f tmpTransformation_) {
-		this.tmpTransformation_ = tmpTransformation_;
+		this.tmpTransformation_ = new Matrix4f(tmpTransformation_);
 	}
+	
+	/*
+	 * This function helps to change from the input original vector to the current changed vector
+	 */
+	public Vector3f getCurrentVector(Vector3f posOri, boolean bWithTmpTrans, boolean bVector) {
+		float w = 1.f;
+		if (bVector) w = 0.f;
+		if (bWithTmpTrans) {
+			Vector4f transP = getWorldTransformation().multiply(new Vector4f(posOri, w));
+			return new Vector3f(transP.toArray(), 0);	
+		}
+		else {
+			Vector4f transP = getCurrentTransformation().multiply(new Vector4f(posOri, w));
+			return new Vector3f(transP.toArray(), 0);	
+
+		}
+	}
+	
 }

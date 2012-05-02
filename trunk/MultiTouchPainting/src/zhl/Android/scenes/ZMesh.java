@@ -30,6 +30,15 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 	public final static int FACE_EDGE_NUM = 3;
 	public final static int COLOR_FORMAT = 4;
 	
+	public final static String preFix = "/sdcard/models/"; 
+	public final static String strName01 = preFix + "01.obj";
+	public final static String strNameCylinder = preFix + "cylinder.obj";
+	public final static String strNameCone = preFix + "cone.obj";
+	public final static String strNameCube = preFix + "cube.obj";
+	public final static String strNameElk = preFix + "elk.obj";
+	public final static String strNameSphere = preFix + "sphere.obj";
+	public final static String strNameTable = preFix + "table_more.obj";
+	
 	private boolean bKeepMeshData = true;
 	
 	protected class ZSimpleMeshData {
@@ -68,7 +77,7 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 			this.normals_ = normals;
 		}
 		public Vector3f getVertex(int index) {
-			return new Vector3f(verticesPos_[index*3], verticesPos_[index*3+1], verticesPos_[index*3+2]);
+			return new Vector3f(verticesPos_[index*3], verticesPos_[index*3+1], verticesPos_[index*3+2]); 
 		}
 		public void setColorAt(int index, float[] color) {
 			if (verticesColor_==null) {
@@ -120,6 +129,7 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 	}
 	
 	public ZMesh() {
+		super();
 		this.setVisable(true);
 	}
 	
@@ -134,7 +144,7 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 			prepareBuffers();
 		}
 		updateObject(gl);
-		//gl.glMultMatrixf(transformation_.transpose().getMatrix(), 0);
+		gl.glPushMatrix();
 		gl.glMultMatrixf(getWorldTransformation().transpose().getMatrix(), 0);
 		if (this.isVisable()) {
 			gl.glDrawElements(GL10.GL_TRIANGLES, numOfIndices_, GL10.GL_UNSIGNED_SHORT, indicesBuffer_);
@@ -152,10 +162,11 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 					}
 				}
 				else {
-				 obj.draw(gl);
+					obj.draw(gl);
 				}
 			}			
 		}
+		gl.glPopMatrix();
 
 	}
 
@@ -183,7 +194,7 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 	 */
 	public boolean pick(ZProjector proj, float x, float y) {
 		// TODO Auto-generated method stub
-		Log.d(LOG_TAG, "Begin to pick.");
+		Log.d(LOG_TAG, this.getName() + "--Begin to pick.");
 		getPickedObjs().clear();
 		proj.unProject(x, y);
 		Vector3f stPt = proj.getRayStart();
@@ -194,9 +205,9 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 			int vIdx0 = meshData_.faceIndices_[i*3];
 			int vIdx1 = meshData_.faceIndices_[i*3+1];
 			int vIdx2 = meshData_.faceIndices_[i*3+2];
-			Vector3f v0 = meshData_.getVertex(vIdx0);
-			Vector3f v1 = meshData_.getVertex(vIdx1);
-			Vector3f v2 = meshData_.getVertex(vIdx2);
+			Vector3f v0 = getVertex(vIdx0);//meshData_.getVertex(vIdx0);
+			Vector3f v1 = getVertex(vIdx1);//meshData_.getVertex(vIdx1);
+			Vector3f v2 = getVertex(vIdx2);//meshData_.getVertex(vIdx2);
 			//Vector3f intersect = new Vector3f();
 			TriangleIntersection intersect = ZAlgorithms.intersect_RayTriangle(stPt, edPt, v0, v1, v2);
 			//int bIntersect = ZAlgorithms.intersect_RayTriangle(stPt, edPt, v0, v1, v2, intersect);
@@ -372,5 +383,10 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 		}
 	}
 
+	public Vector3f getVertex(int idx) {
+		Vector3f pos = meshData_.getVertex(idx);
+		Vector4f posW = getWorldTransformation().multiply(new Vector4f(pos, 1.f));
+		return new Vector3f(posW.toArray(), 0);
+	}
 	
 }

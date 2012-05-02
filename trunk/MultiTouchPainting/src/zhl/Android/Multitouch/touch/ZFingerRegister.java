@@ -41,7 +41,7 @@ public class ZFingerRegister {
 		void onGroupHold(Object sender, ZTouchGroup group);
 		void onGroupAddPoint(Object sender, ZTouchGroup group, ZTouchRecord record);
 		void onGroupRemovePoint(Object sender, ZTouchGroup group, ZTouchRecord record);
-		//void onDraw(GL10 gl);
+		void onDraw(GL10 gl);
 		ZView getView();
 	}
 	
@@ -81,7 +81,7 @@ public class ZFingerRegister {
 				ZTouchRecord record) {
 			Log.d(LOG_TAG, "onGroupRemovePointEx");
 		}
-		//public void onDraw(GL10 gl) {}
+		public void onDraw(GL10 gl) {}
 		public ZView getView() {return null;}
 	}
 	
@@ -537,7 +537,7 @@ public class ZFingerRegister {
 				}
 			}	
 		//}
-		
+		listener_.onDraw(gl);
 	}
 
 	private boolean bGroupTouchPoints_ = true;
