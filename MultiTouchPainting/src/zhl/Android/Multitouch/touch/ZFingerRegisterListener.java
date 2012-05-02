@@ -19,6 +19,7 @@ import zhl.Android.math.Vector2f;
 import zhl.Android.math.Vector3f;
 import zhl.Android.scenes.ZAxis;
 import zhl.Android.scenes.ZDataManager;
+import zhl.Android.scenes.ZLine3D;
 import zhl.Android.scenes.ZMesh;
 import zhl.Android.scenes.ZObject3D;
 import zhl.Android.scenes.ZAxis.AxisType;
@@ -36,7 +37,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 	private boolean boundObject_ = false;
 	
 	private ZView view_;
-	private Matrix4f currTouchTransformation_ = Matrix4f.identityMatrix();
+	//private Matrix4f currTouchTransformation_ = Matrix4f.identityMatrix();
 	private HashSet<ZObject3D> selectedObjects_ = new HashSet<ZObject3D>();
 	
 	private boolean useSupportOpertaions_ = false;
@@ -51,6 +52,9 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 	private boolean useGlobalAxes_;
 
 	private boolean useScreenAxes_;
+	
+	private ZLine3D tmpAxisLine = new ZLine3D();
+	private ZLine3D tmpAxisLine3D = new ZLine3D();
 	
 	public ZFingerRegisterListener(ZView view) {
 		this.view_ = view;
@@ -69,7 +73,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			|| operationMode_ == EnumOperationMode.GlobalZoom) {
 			// apply global transformation
 			Matrix4f m = view_.getTrackball().getMatrix();
-			this.currTouchTransformation_ = m.multiply(currTouchTransformation_);
+			//this.currTouchTransformation_ = m.multiply(currTouchTransformation_);
 			
 			// update status
 			view_.endTransformation();
@@ -91,14 +95,15 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			|| operationMode_ == EnumOperationMode.PlannerTranslation) {
 			// update axes
 			for (ZObject3D obj : this.selectedObjects_) {
-				obj.applyTransformation(currTouchTransformation_);
+				//obj.applyTransformation(currTouchTransformation_);
+				obj.endTransformation();
 				resetAxis(this.focusObject_);
 			}
 			
 			// update status
 			this.focusObject_.setSelectedAxis(null);
 			this.focusObject_.setSelectedPlaneAxes(null);
-			this.currTouchTransformation_ = Matrix4f.identityMatrix();
+			//this.currTouchTransformation_ = Matrix4f.identityMatrix();
 			this.operationMode_ = EnumOperationMode.Unknown;
 			
 		}
@@ -233,12 +238,12 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			
 			// get translate matrix
 			Matrix4f tran = Matrix4f.translationMatrix(t);
-			focusObject_.setTmpTransformation(tran);
+			focusObject_.setTmpTransformation(tran); 
 			
 //			if (boundObject_ && !checkTransformation(tran)) {
 //				return;
 //			}
-			this.currTouchTransformation_  = tran;
+			//this.currTouchTransformation_  = tran;
 			return;
 		}
 		
@@ -284,7 +289,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 //			if (boundObject_ && !checkTransformation(tran)) {
 //				return;
 //			}
-			this.currTouchTransformation_ = tran;
+			//this.currTouchTransformation_ = tran;
 			return;
 		}
 		
@@ -304,14 +309,15 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			else if (scale<-0.3f) scale += 0.3f;
 			else scale = 0.f;
 			
-			Vector3f t = axis.getDir().plus(axis.getDir().normalize()).times(scale);
+			Vector3f t = axis.getCurrentDir(false).plus(axis.getCurrentDir(false).normalize()).times(scale);
+			//Vector3f t = axis.getCurrentDir(false).times(scale);
 			
 			// get translate matrix
 			//  UNDO:
 			
 			Matrix4f tran = Matrix4f.translationMatrix(t);
 			focusObject_.setTmpTransformation(tran);
-			this.currTouchTransformation_ = tran;
+			//this.currTouchTransformation_ = tran;
 			return;
 		}
 		
@@ -332,14 +338,14 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			}
 			
 			// get rotation matrix
-			Vector3f c = axis.getOri();
-			Vector3f a = axis.getDir();
+			Vector3f c = axis.getCurrentOri(false); 
+			Vector3f a = axis.getCurrentDir(false);
+			Log.d(LOG_TAG, "center:" + c + " dir:" + a);
 			
 			// TODO
-			Matrix4f tran = Matrix4f.translationMatrix(c);
-			tran = tran.multiply(Matrix4f.rotatationMatrix(a, (float)(scale*180.f/Math.PI))).multiply(Matrix4f.translationMatrix(c.times(-1.f)));
+			Matrix4f tran = Matrix4f.rotationMatrix(c, a, (float)(scale*180.f/Math.PI));
 			this.focusObject_.setTmpTransformation(tran);
-			this.currTouchTransformation_ = tran;
+			//this.currTouchTransformation_ = tran;
 			return;
 		}
 		
@@ -360,7 +366,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			
 			// computing scalig matrix
 			ZAxis axis = focusObject_.getSelectedAxis();
-			Vector3f a = axis.getDir().normalize();
+			Vector3f a = axis.getCurrentDir(false).normalize();
 			Matrix3f S = a.outerCross(a).times(scale);
 			S.set(0, 0, S.get(0,0)+1);
 			S.set(1, 1, S.get(1,1)+1);
@@ -374,7 +380,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			Matrix4f tran = Matrix4f.translationMatrix(c);
 			tran = tran.multiply(S2).multiply(Matrix4f.translationMatrix(c.times(-1.f)));
 			this.focusObject_.setTmpTransformation(tran);
-			this.currTouchTransformation_ = tran;
+			//this.currTouchTransformation_ = tran;
 			return;
 		}
 		
@@ -607,6 +613,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		/// one-point tap - pick 3D object
 		if (group.oldTouchRecords_.size()==1) {
 			ZObject3D obj = pickObject3D(x, y);
+			if (obj!=null) Log.d(LOG_TAG, obj.getName());
 			
 			// first deseect current focused object
 			if (this.focusObject_ != null) {
@@ -849,6 +856,10 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		RectF viewport = new RectF(0, 0, view_.getWidth(), view_.getHeight());
 		if (viewport.contains(x, y)==false) return null;
 		
+//		ZLine3D line = view_.getProjector().getRayLineFromTouchPoint(x, y);
+//		ZDataManager.getDataManager().getAllObject3D().add(line);
+//		view_.updateRenderData();
+//		Log.d(LOG_TAG, ZDataManager.getDataManager().getAllObject3D().size() + " " + line.toString());
 		// update projector
 		// iterative check all 3D objects
 		ZObject3D pickedObj = null;
@@ -898,11 +909,12 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 					continue;
 				
 				// compute projected axis
-				Vector3f c = axis.getOri();
-				Vector3f v = c.plus(axis.getDir()).plus(axis.getDir().normalize());
+				Vector3f c = axis.getCurrentOri(false);
+				Vector3f v = c.plus(axis.getCurrentDir(false)).plus(axis.getCurrentDir(false).normalize());
 				Vector3f proj_c = view_.getProjector().project(c);
 				Vector3f proj_v = view_.getProjector().project(v);
 				Vector2f projectedAxis2D = new Vector2f(proj_v.x_ - proj_c.x_, proj_v.y_ - proj_c.y_);
+				
 				
 				// store projected coordinates to axis object
 				axis.setProjectedAxis(projectedAxis2D);
@@ -922,6 +934,11 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 				if (error>maxError) {
 					maxError = error;
 					maxAxis = axis;
+					// store the projected axis to show
+					this.tmpAxisLine.setLine(proj_c, proj_v);
+					this.tmpAxisLine.setColor(1.f, 1.f, 0.f, 1.f);
+					this.tmpAxisLine3D.setLine(c, v);
+					this.tmpAxisLine3D.setColor(0.f, 1.f, 1.f, 1.f);
 				}
 			}
 		}
@@ -964,13 +981,14 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 	}
 
 	public ZView getView() {
-		// TODO Auto-generated method stub
+//		 TODO Auto-generated method stub
 		return view_;
 	}
 
-//	public void onDraw(GL10 gl) {
-//		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
-//		//for (ZTouchGroup group : )
-//		
-//	}
+	public void onDraw(GL10 gl) {
+		gl.glPushMatrix();
+		tmpAxisLine.draw(gl);
+		tmpAxisLine3D.draw(gl);
+		gl.glPopMatrix();
+	}
 }

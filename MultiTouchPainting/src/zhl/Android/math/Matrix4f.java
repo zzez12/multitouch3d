@@ -5,7 +5,7 @@ public class Matrix4f {
 	public static final int row_size_ = 4;
 	public static final int col_size_ = 4;
 	private float [] e_ = new float[len_];
-
+	
 	public static Matrix4f identityMatrix() {
 		// TODO Auto-generated method stub
 		Matrix4f m = new Matrix4f();
@@ -28,7 +28,7 @@ public class Matrix4f {
 		return m;
 	}
 	
-	public static Matrix4f rotatationMatrix(Vector3f axis, float theta) {
+	public static Matrix4f rotationMatrix(Vector3f axis, float theta) {
 		Matrix4f m = new Matrix4f();
 		float cosA = (float)Math.cos(theta);
 		float sinA = (float)Math.sin(theta);
@@ -38,14 +38,21 @@ public class Matrix4f {
 		m.set(4, (1-cosA)*axis.x_*axis.y_+sinA*axis.z_);
 		m.set(5, cosA+(1-cosA)*axis.y_*axis.y_);
 		m.set(6, (1-cosA)*axis.y_*axis.z_-sinA*axis.x_);
-		m.set(8, (1-cosA)*axis.x_*axis.z_-sinA*axis.x_);
-		m.set(9, (1-cosA)*axis.y_*axis.z_+sinA*axis.x_);
+		m.set(8, (1-cosA)*axis.x_*axis.z_-sinA*axis.y_);
+		m.set(9, (1-cosA)*axis.y_*axis.z_+sinA*axis.x_); 
 		m.set(10, cosA+(1-cosA)*axis.z_*axis.z_);
 		m.set(15, 1.f);
 		return m;
 	}
 	
-	public Matrix4f() {}
+	public static Matrix4f rotationMatrix(Vector3f center, Vector3f axis, float theta) {
+		Matrix4f m = translationMatrix(center).multiply(rotationMatrix(axis, theta)).multiply(translationMatrix(center.times(-1.f)));
+		return m;
+	}
+	
+	public Matrix4f() {
+		for (int i=0; i<len_; i++) e_[i] = 0.f;
+	}
 	
 	public Matrix4f(float [] arr) {
 		for (int i=0; i<len_; i++) e_[i] = arr[i];
@@ -67,6 +74,12 @@ public class Matrix4f {
 			set(i, 2, v3.get(i));
 			set(i, 3, v4.get(i));
 		}
+	}
+	public Matrix4f(Matrix4f m) {
+		for (int i=0; i<row_size_; i++)
+			for (int j=0; j<col_size_;j ++) {
+				set(i,j,m.get(i, j));
+			}
 	}
 	
 	public Matrix4f multiply(Matrix4f m) {

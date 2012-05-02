@@ -1,5 +1,7 @@
 package zhl.Android.scenes;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class ZDataManager {
@@ -20,6 +22,13 @@ public class ZDataManager {
 	
 	public ZObject3D getObject3D(int index) {
 		return allObject3D_.get(index);
+	}
+	
+	public void addMesh(String str) throws FileNotFoundException, IOException {
+		ZMesh mesh = new ZMesh();
+		mesh.load(str);
+		mesh.buildAxes();
+		getDataManager().getAllObject3D().add(mesh);
 	}
 
 //	public ZMesh getSimpleMesh_() {

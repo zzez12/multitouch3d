@@ -6,6 +6,7 @@ import android.opengl.GLU;
 import android.opengl.Matrix;
 
 import zhl.Android.math.Vector3f;
+import zhl.Android.scenes.ZLine3D;
 
 public class ZProjector {
 	private GL10 gl_=null;
@@ -57,7 +58,7 @@ public class ZProjector {
 	}
 	
 	public void unProject(float x, float y) {
-		y = getViewPortM()[3] - y;
+		//y = getViewPortM()[3] - y;
 		float [] r1 = new float[4];
 		float [] r2 = new float[4];
 		GLU.gluUnProject(x, y, 0f, getViewModel(), 0, getProjM(), 0, getViewPortM(), 0, r1, 0);
@@ -180,5 +181,11 @@ public class ZProjector {
 	}
 	public void setGL(GL10 gl_) {
 		this.gl_ = gl_;
+	}
+	
+
+	public ZLine3D getRayLineFromTouchPoint(float x, float y) {
+		this.unProject(x, y);
+		return new ZLine3D(getRayStart(), getRayEnd());
 	}
 }
