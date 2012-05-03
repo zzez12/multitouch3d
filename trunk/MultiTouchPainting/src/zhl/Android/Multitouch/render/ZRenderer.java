@@ -11,6 +11,7 @@ import zhl.Android.scenes.ZDataManager;
 import zhl.Android.scenes.ZMesh;
 import zhl.Android.scenes.ZMeshGroup;
 import zhl.Android.scenes.ZObject3D;
+import zhl.Android.scenes.ZReferencePlane;
 
 import android.opengl.GLSurfaceView;
 import android.opengl.GLU;
@@ -33,7 +34,11 @@ public class ZRenderer implements GLSurfaceView.Renderer {
 	private float height_ = 480.0f;
 	private float viewportScaleRatio_ = (width_>height_ ? height_ : width_);
 	
-	public ZRenderer(ZView view) {
+	private boolean showReferenceGrid_ = true;
+	private boolean showReferenceFrame_ = true;
+	private ZReferencePlane referencePlane_ = new ZReferencePlane();
+	
+ 	public ZRenderer(ZView view) {
 		this.view_ = view;
 	}
 
@@ -47,6 +52,9 @@ public class ZRenderer implements GLSurfaceView.Renderer {
 		setGL(gl);
 		start3DRendering(gl);
 		draw3DObjects(gl);
+		if (showReferenceGrid_) {
+			referencePlane_.draw(gl);
+		}
 		end3DRendering(gl);	
 		
 		start2DRendering(gl);
@@ -260,5 +268,5 @@ public class ZRenderer implements GLSurfaceView.Renderer {
 		gl.glMatrixMode(GL10.GL_PROJECTION);
 		gl.glPopMatrix();
 	}
-
+	
 }

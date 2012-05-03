@@ -8,6 +8,7 @@ public class ZColor {
 	public static final float [] colorBlack = {0.f, 0.f, 0.f, 1.f};
 	public static final float [][] colorTable = {colorBlack, colorWhite, colorRed, colorGreen, colorBlue,
 		{0.3f, 0.3f, 0.f, 1.f}, {0.f, 0.3f, 0.3f, 1.f} };
+	public static final float [] colorGray = {0.5f, 0.5f, 0.5f, 1.f};
 	
 	public static final float [] axisColorX = {1.f, 0.f, 0.f, 1.f};
 	public static final float [] axisColorY = {0.f, 1.f, 0.f, 1.f};
