@@ -178,7 +178,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		if (operationMode_ == EnumOperationMode.GlobalZoom
 			&& group.oldTouchRecords_.size()==0) {
 			Vector2f p = new Vector2f(group.scalingRatio_, 0.f).times(view_.getWidth());
-			view_.getTrackball().drag(p);
+			view_.getTrackball().drag(p); 
 			return;
 		}
 		// +axis/planner transformation
@@ -470,8 +470,8 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 
 	public void onGroupStartTransform(Object sender, ZTouchGroup group) {
 		// TODO Auto-generated method stub
-		//Log.d(LOG_TAG, "onGroupStartTransform()"  + currentStatus());
-		//Log.d(LOG_TAG, " group: " + group.currentStatus());
+		Log.d(LOG_TAG, "onGroupStartTransform()"  + currentStatus());
+		Log.d(LOG_TAG, " group: " + group.currentStatus());
 		
 		/// start global panning
 		if (operationMode_ == EnumOperationMode.Unknown
@@ -494,8 +494,8 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		if (operationMode_ == EnumOperationMode.Unknown
 			//&& useSupportOpertaions_ == true
 			&& group.transformationMode_ == TouchTransformationMode.Scaling
-			&& group.oldTouchRecords_.size()==0
-			&& group.touchRecords_.size()>=4
+			&& group.oldTouchRecords_.size()==0 //) {
+			&& group.touchRecords_.size()>=4  
 			&& group.palm_ == EnumPalm.Right) {
 			Vector2f p = new Vector2f(group.scalingRatio_, 0.f);
 			p = p.times(view_.getWidth());
@@ -595,7 +595,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		
 		/// start copying object
 		// TODO
-		//Log.d(LOG_TAG, "onGroupStartTransform()"  + currentStatus());
+		Log.d(LOG_TAG, "~onGroupStartTransform()"  + currentStatus());
 	}
 
 	public void onGroupTap(Object sender, ZTouchGroup group) {

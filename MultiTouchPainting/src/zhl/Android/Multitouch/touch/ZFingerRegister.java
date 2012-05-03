@@ -211,9 +211,9 @@ public class ZFingerRegister {
 			listener_.onGroupCreate(this, minGroup);
 			
 			// detect finger
-//			if (minGroup.touchRecords_.size() >= numOfFingerToStartRegister_ && bDetectFingers_) {
-//				detectFingers(minGroup);
-//			}
+			if (minGroup.touchRecords_.size() >= numOfFingerToStartRegister_ && bDetectFingers_) {
+				detectFingers(minGroup);
+			}
 			
 			// generate group add point event
 			listener_.onGroupAddPoint(this, minGroup, r);
@@ -541,7 +541,7 @@ public class ZFingerRegister {
 	}
 
 	private boolean bGroupTouchPoints_ = true;
-	private boolean bDetectFingers_ = true;
+	private boolean bDetectFingers_ = false;	// this is not supported now
 	private float fDistanceRatio_ = 1.2f;
 	private ZTouchGroup lastTag_ = null;
 	private ZTimer timer_ = new ZTimer();

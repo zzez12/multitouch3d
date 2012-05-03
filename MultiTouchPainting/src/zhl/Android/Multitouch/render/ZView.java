@@ -34,8 +34,8 @@ public class ZView extends GLSurfaceView {
 	};
 	
 	private ZRenderer renderer_ = null;
-	private GestureDetector gestureDetect_ = null;
-	private ScaleGestureDetector scaleDetect_ = null;
+	//private GestureDetector gestureDetect_ = null;
+	//private ScaleGestureDetector scaleDetect_ = null;
 	private ZFingerRegister fingerDetect_ = null;
 	
 	private EnumOperationMode operationMode_ = EnumOperationMode.Unknown;
@@ -69,17 +69,13 @@ public class ZView extends GLSurfaceView {
 		updateRenderData();
 	}
 	
-//	private void init() {
-//		//modelM_[0] = modelM_[5] = modelM_[10] = modelM_[15] = 1.f;
-//	}
-	
 	public Trackball getTrackball() { 
 		return getRenderer().getTrackball();
 	}
 	
 	public void initMesh() throws FileNotFoundException, IOException {
-		//ZDataManager.getDataManager().addMesh(ZMesh.strNameSphere);
-		//ZDataManager.getDataManager().addMesh(ZMesh.strName01);
+		ZDataManager.getDataManager().addMesh(ZMesh.strNameSphere);
+		ZDataManager.getDataManager().addMesh(ZMesh.strName01);
 		ZDataManager.getDataManager().addMesh(ZMesh.strNameCone);
 		
 		Log.d(LOG_TAG, "Mesh initialized.");
@@ -116,21 +112,21 @@ public class ZView extends GLSurfaceView {
 		return getRenderer().getWidth();
 	}
 
-	public GestureDetector getGestureDetect() {
-		return gestureDetect_;
-	}
-
-	public void setGestureDetect(GestureDetector gestureDetect_) {
-		this.gestureDetect_ = gestureDetect_;
-	}
-
-	public ScaleGestureDetector getScaleDetect() {
-		return scaleDetect_;
-	}
-
-	public void setScaleDetect(ScaleGestureDetector scaleDetect_) {
-		this.scaleDetect_ = scaleDetect_;
-	}
+//	public GestureDetector getGestureDetect() {
+//		return gestureDetect_;
+//	}
+//
+//	public void setGestureDetect(GestureDetector gestureDetect_) {
+//		this.gestureDetect_ = gestureDetect_;
+//	}
+//
+//	public ScaleGestureDetector getScaleDetect() {
+//		return scaleDetect_;
+//	}
+//
+//	public void setScaleDetect(ScaleGestureDetector scaleDetect_) {
+//		this.scaleDetect_ = scaleDetect_;
+//	}
 	
 	public ZFingerRegister getFingerDetect() {
 		return this.fingerDetect_;
