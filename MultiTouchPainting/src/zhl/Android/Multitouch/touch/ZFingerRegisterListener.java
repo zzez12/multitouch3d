@@ -234,7 +234,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 				s1 = c21.dot(projAxis1) / projAxis1.length() / ratio1;
 				s2 = c21.dot(projAxis2) / projAxis2.length() / ratio2;
 			}
-			Vector3f t = axis1.getOri().times(s1).plus(axis2.getOri().times(s2));
+			Vector3f t = axis1.getCurrentDir(false).times(s1).plus(axis2.getCurrentDir(false).times(s2));
 			
 			// get translate matrix
 			Matrix4f tran = Matrix4f.translationMatrix(t);
@@ -340,7 +340,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			// get rotation matrix
 			Vector3f c = axis.getCurrentOri(false); 
 			Vector3f a = axis.getCurrentDir(false);
-			Log.d(LOG_TAG, "center:" + c + " dir:" + a);
+			//Log.d(LOG_TAG, "center:" + c + " dir:" + a);
 			
 			// TODO
 			Matrix4f tran = Matrix4f.rotationMatrix(c, a, (float)(scale*180.f/Math.PI));
@@ -385,6 +385,26 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		}
 		
 		/// object uniform scaling
+		if (operationMode_ == EnumOperationMode.UniformScale
+			&& group.oldTouchRecords_.size()==0) {
+			// get scaling scale
+			// adjust with buffer zoom
+			float scale = group.scalingRatio_;
+			float threshold = 0.3f;
+			if (scale > threshold) scale = scale-threshold;
+			else if (scale < -threshold) scale = scale + threshold;
+			else scale = 0.f;
+			
+			// compute scaling matrix
+			Matrix4f S = Matrix4f.identityMatrix().times(1.f+scale);
+			S.set(3, 3, 1.f);
+			
+			// get matrix
+			Vector3f c = focusObject_.getObjCenter();
+			Matrix4f tran = Matrix4f.scalingMatrix(c, 1.f+scale);
+			focusObject_.setTmpTransformation(tran);
+			// get matrix
+		}
 	}
 
 	public void onGroupLongMove(Object sender, ZTouchGroup group,
@@ -435,6 +455,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			&& group.touchRecords_.size() == 2) {
 			// if previous two-point tap found => select plane
 			// else select axis
+			Log.d(LOG_TAG, "Long-Time:" + group.touchRecords_.first().downTime_ + "-" + lastTwoTapDownTime_);
 			if (group.touchRecords_.first().downTime_ - lastTwoTapDownTime_ < 1000) {
 				ZAxis axis = pickAxis(group);
 				focusObject_.setSelectedAxis(axis);
@@ -781,7 +802,8 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			
 			// if previous two-point tap found => select plane
 			// else select axis
-			if (record.downTime_ - this.lastTwoTapDownTime_ < 1000) {
+			Log.d(LOG_TAG, "Add-Time:" + group.touchRecords_.first().downTime_ + "-" + lastTwoTapDownTime_ + "=" + (record.downTime_ - this.lastTwoTapDownTime_));
+			if (record.downTime_ - this.lastTwoTapDownTime_ < 2000) {
 				ZAxis axis = pickAxis(group);
 				focusObject_.setSelectedAxis(axis);
 				ZAxis[] planeAxes = pickPlane(group);
@@ -948,6 +970,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 
 	// return the axes that define a plane
 	private ZAxis[] pickPlane(ZTouchGroup group) {
+		Log.d(LOG_TAG, "Begin to pick plane..");
 		// first pick the axis
 		ZAxis pickedAxis = pickAxis(group);
 		if (pickedAxis==null) return null;

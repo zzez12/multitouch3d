@@ -40,6 +40,7 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 	private ArrayList<Object> pickedObjs_ = new ArrayList<Object>();
 	private ZAxis selectedAxis_ = null;
 	private ZAxis[] selectedPlaneAxes_ = null;
+	private ZPolygon3D selectedPlaneObj_ = null;
 	private ZSnapPlane selectedSnapPlane_ = null;
 	protected Vector3f objCenter_ = new Vector3f();
 
@@ -171,6 +172,7 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 			gl.glColorPointer(4, GL10.GL_FLOAT, 0, colorBuffer_);
 		} else {
 			gl.glDisableClientState(GL10.GL_COLOR_ARRAY);
+			//gl.glDisable(GL10.GL_TEXTURE_2D);
 			gl.glColor4f(rgba_[0], rgba_[1], rgba_[2], rgba_[3]);
 		}
 		if (normalBuffer_!=null) {
@@ -251,6 +253,7 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 	}
 	public void setSelectedPlaneAxes(ZAxis[] selectedPlaneAxes_) {
 		this.selectedPlaneAxes_ = selectedPlaneAxes_;
+		this.buildSelectedPlane();
 	}
 	public Vector3f getObjCenter() {
 		return objCenter_;
@@ -374,6 +377,27 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 	}
 	public void setTmpTransformation(Matrix4f tmpTransformation_) {
 		this.tmpTransformation_ = new Matrix4f(tmpTransformation_);
+	}
+	
+	private void buildSelectedPlane() {
+		if (getSelectedPlaneAxes()==null) return;
+		
+		Vector3f f1 = this.selectedPlaneAxes_[0].getDir().times(2.f);
+		Vector3f f2 = this.selectedPlaneAxes_[1].getDir().times(2.f);
+		Vector3f c = this.getObjCenter();
+		Vector3f[] vs = new Vector3f[4];
+		vs[0] = new Vector3f(c.plus(f1).plus(f2));
+		vs[1] = new Vector3f(c.minus(f1).plus(f2));
+		vs[2] = new Vector3f(c.minus(f1).minus(f2));
+		vs[3] = new Vector3f(c.plus(f1).minus(f2));
+		this.selectedPlaneObj_ = new ZPolygon3D(vs);
+	}
+	
+	protected void drawSelectedPlane(GL10 gl) {
+		if (this.selectedPlaneObj_==null || this.getSelectedPlaneAxes()==null) return;
+		gl.glDisable(GL10.GL_CULL_FACE);
+		selectedPlaneObj_.draw(gl);
+		gl.glEnable(GL10.GL_CULL_FACE);
 	}
 	
 	/*

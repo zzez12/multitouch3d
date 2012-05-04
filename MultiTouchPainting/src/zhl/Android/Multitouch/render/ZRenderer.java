@@ -103,6 +103,7 @@ public class ZRenderer implements GLSurfaceView.Renderer {
 		gl.glEnable(GL10.GL_CULL_FACE);
 		gl.glPolygonOffset(1.f, 1.f);
 		gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+		//gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE);
 		
 		gl.glEnable(GL10.GL_POINT_SMOOTH);
 		gl.glEnable(GL10.GL_LINE_SMOOTH);
