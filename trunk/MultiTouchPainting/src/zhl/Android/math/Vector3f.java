@@ -41,12 +41,12 @@ public class Vector3f {
 		y_ = arr[index+1];
 		z_ = arr[index+2];
 	}
-//	public Vector3f(Vector3f v) {
-//		x_ = v.x_;
-//		y_ = v.y_;
-//		z_ = v.z_;
-//	}
-//	
+	public Vector3f(Vector3f v) {
+		x_ = v.x_;
+		y_ = v.y_;
+		z_ = v.z_;
+	}
+	
 	public float get(int index) {
 		if (index==0) return x_;
 		else if (index==1) return y_;
@@ -65,6 +65,12 @@ public class Vector3f {
 		x_ = x;
 		y_ = y;
 		z_ = z;
+	}
+	
+	public void set(Vector3f v) {
+		x_ = v.x_;
+		y_ = v.y_;
+		z_ = v.z_;
 	}
 	
 	public float dot(Vector3f v) {

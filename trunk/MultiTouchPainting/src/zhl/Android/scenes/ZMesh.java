@@ -148,6 +148,8 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 		gl.glMultMatrixf(getWorldTransformation().transpose().getMatrix(), 0);
 		if (this.isVisable()) {
 			gl.glDrawElements(GL10.GL_TRIANGLES, numOfIndices_, GL10.GL_UNSIGNED_SHORT, indicesBuffer_);
+			// draw selected plane
+			drawSelectedPlane(gl);
 		}
 		// draw children objects
 		if (this.isFocused()) {
@@ -388,5 +390,5 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 		Vector4f posW = getWorldTransformation().multiply(new Vector4f(pos, 1.f));
 		return new Vector3f(posW.toArray(), 0);
 	}
-	
+
 }

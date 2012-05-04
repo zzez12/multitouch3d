@@ -50,6 +50,11 @@ public class Matrix4f {
 		return m;
 	}
 	
+	public static Matrix4f scalingMatrix(Vector3f center, float scale) {
+		Matrix4f m = translationMatrix(center).multiply(identityMatrix().times(scale)).translationMatrix(center.times(-1.f));
+		return m;
+	}
+	
 	public Matrix4f() {
 		for (int i=0; i<len_; i++) e_[i] = 0.f;
 	}
@@ -101,6 +106,13 @@ public class Matrix4f {
 		ret.y_ = e_[4]*v.x_ + e_[5]*v.y_ + e_[6]*v.z_ + e_[7]*v.w_;
 		ret.z_ = e_[8]*v.x_ + e_[9]*v.y_ + e_[10]*v.z_ + e_[11]*v.w_;
 		ret.w_ = e_[12]*v.x_ + e_[13]*v.y_ + e_[14]*v.z_ + e_[15]*v.w_;
+		return ret;
+	}
+	
+	public Matrix4f times(float f) {
+		Matrix4f ret = new Matrix4f();
+		for (int i=0; i<len_; i++)
+			ret.set(i, get(i)*f);
 		return ret;
 	}
 	
