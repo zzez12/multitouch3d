@@ -54,6 +54,12 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 			setColor(verticesColor);
 			setNormals(normal);
 		}
+		public ZSimpleMeshData(ZSimpleMeshData datas) {
+			setVertices(datas.verticesPos_);
+			setIndices(datas.faceIndices_);
+			setColor(datas.verticesColor_);
+			setNormals(datas.normals_);
+		}
 		public boolean isValid() {
 			return verticesPos_!=null && faceIndices_!=null;
 		}
@@ -131,6 +137,14 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 	public ZMesh() {
 		super();
 		this.setVisable(true);
+	}
+	
+	public ZMesh(ZMesh mesh) {
+		// UNDO
+		if (mesh.meshData_!=null) {
+			meshData_ = new ZSimpleMeshData(mesh.meshData_);
+		}
+		prepareBuffers();
 	}
 	
 //	private boolean parseOBJ() {
