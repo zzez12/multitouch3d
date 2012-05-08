@@ -616,6 +616,64 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		
 		/// start copying object
 		// TODO
+		if (operationMode_ == EnumOperationMode.Unknown
+			//&& useSinglePointUI == false
+			&& focusObject_ != null
+			&& group.transformationMode_ == TouchTransformationMode.Translation
+			&& group.oldTouchRecords_.size() == 0
+			&& group.touchRecords_.size() >= 3) {
+			// get moving direction
+			float dx = 0.f;
+			float dy = 0.f;
+			float cx = 0.f;
+			float cy = 0.f;
+			int n = group.touchRecords_.size();
+			for (ZTouchRecord rec : group.touchRecords_) {
+				dx += rec.downX_;
+				dy += view_.getHeight() - rec.downY_;
+				cx += rec.x_;
+				cy += view_.getHeight() - rec.y_;
+			}
+			dx /= n;
+			dy /= n;
+			cx /= n;
+			cy /= n;
+			Vector2f dir = new Vector2f(cx-dx, cy-dy).normalize();
+			HashSet<ZObject3D> newObjectSet = new HashSet<ZObject3D>();
+			for (ZObject3D obj : this.selectedObjects_) {
+				obj.setSelected(false);
+				
+				if (!(obj instanceof ZMesh)) {
+					continue;
+				}
+				// create new object
+				ZMesh newObj = new ZMesh((ZMesh)obj);
+				newObj.setSelected(true);
+				newObj.show();
+				ZDataManager.getDataManager().getAllObject3D().add(newObj);
+				newObjectSet.add(newObj);
+				
+				if (obj == this.focusObject_) {
+					// set new object being focused
+					this.focusObject_.setFocused(false);
+					this.focusObject_.hideAxes();
+					
+					this.focusObject_ = newObj;
+					this.focusObject_.setFocused(true);
+					
+					// pick axis
+					ZAxis axis = pickAxis(dir);
+					
+					// start translation
+					this.focusObject_.setSelectedAxis(axis);
+					this.focusObject_.setFinishedAxisSelection(true);
+					this.operationMode_ = EnumOperationMode.Translation;
+					
+				}
+				this.selectedObjects_ = newObjectSet;
+			}
+		}
+		
 		Log.d(LOG_TAG, "~onGroupStartTransform()"  + currentStatus());
 	}
 
