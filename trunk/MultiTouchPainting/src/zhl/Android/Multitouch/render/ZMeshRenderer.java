@@ -6,6 +6,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import android.util.Log;
 
+import zhl.Android.scenes.ZDataManager;
 import zhl.Android.scenes.ZMesh;
 import zhl.Android.scenes.ZMeshGroup;
 import zhl.Android.scenes.ZObject3D;
@@ -17,46 +18,49 @@ public class ZMeshRenderer {
 	private Vector<Object> toRenderObjs = new Vector<Object>();
 	
 	synchronized public void draw(GL10 gl) {
-		int count = 0;
-		for (Object obj:getToRenderObjs()) {
-			if (obj instanceof ZObject3D) {
-				ZObject3D obj3d = (ZObject3D)obj;
-				obj3d.draw(gl);
-				count ++;
-			}
+		for (ZObject3D obj : ZDataManager.getDataManager().getAllObject3D()) {
+			obj.draw(gl);
 		}
+//		int count = 0;
+//		for (Object obj:getToRenderObjs()) {
+//			if (obj instanceof ZObject3D) {
+//				ZObject3D obj3d = (ZObject3D)obj;
+//				obj3d.draw(gl);
+//				count ++;
+//			}
+//		}
 		//Log.d(TAG_LOG, "" + count + " meshes drawn.");
 	}
 	
-	public void addMesh(Object obj) {
-		if (!hasMesh(obj))
-			getToRenderObjs().add(obj);
-	}
-	
-	public boolean hasMesh(Object o) {
-		for (Object obj:getToRenderObjs()) {
-			if (obj.equals(o))
-				return true;
-		}
-		return false;
-	}
-	
-	public void updateData(GL10 gl) {
-		for (Object obj:getToRenderObjs()) {
-			if (obj instanceof ZObject3D) {
-				ZObject3D obj3d = (ZObject3D)obj;
-				//obj3d.updateObject(gl);
-				obj3d.makeDirty(); // set dirty tag, then it will be updated when rendering
-			}
-		}
-	}
-
-	public Vector<Object> getToRenderObjs() {
-		return toRenderObjs;
-	}
-
-	public void setToRenderObjs(Vector<Object> toRenderObjs) {
-		this.toRenderObjs = toRenderObjs;
-	}
+//	public void addMesh(Object obj) {
+//		if (!hasMesh(obj))
+//			getToRenderObjs().add(obj);
+//	}
+//	
+//	public boolean hasMesh(Object o) {
+//		for (Object obj:getToRenderObjs()) {
+//			if (obj.equals(o))
+//				return true;
+//		}
+//		return false;
+//	}
+//	
+//	public void updateData(GL10 gl) {
+//		for (Object obj:getToRenderObjs()) {
+//			if (obj instanceof ZObject3D) {
+//				ZObject3D obj3d = (ZObject3D)obj;
+//				//obj3d.updateObject(gl);
+//				obj3d.makeDirty(); // set dirty tag, then it will be updated when rendering
+//			}
+//		}
+//	}
+//
+//	public Vector<Object> getToRenderObjs() {
+//		return toRenderObjs;
+//	}
+//
+//	public void setToRenderObjs(Vector<Object> toRenderObjs) {
+//		this.toRenderObjs = toRenderObjs;
+//	}
 	
 }

@@ -4,10 +4,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import zhl.Android.Multitouch.touch.ZTimer;
+
 public class ZDataManager {
 	private static ZDataManager dataManager_ = new ZDataManager();
 		
 	private ArrayList<ZObject3D> allObject3D_ = new ArrayList<ZObject3D>();
+	
+	private ZTimer timer_ = new ZTimer();
 	
 	// prevent from new instance
 	private ZDataManager(){}
@@ -29,6 +33,16 @@ public class ZDataManager {
 		mesh.load(str);
 		mesh.buildAxes();
 		getDataManager().getAllObject3D().add(mesh);
+	}
+	
+	public void resetAll() {
+		for (ZObject3D obj : getAllObject3D()) {
+			obj.reset();
+		}
+	}
+
+	public ZTimer getTimer() {
+		return timer_;
 	}
 
 //	public ZMesh getSimpleMesh_() {

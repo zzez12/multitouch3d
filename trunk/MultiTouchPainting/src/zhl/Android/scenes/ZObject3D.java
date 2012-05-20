@@ -22,7 +22,7 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 	
 	private String name_ = ZObject3D.class.getSimpleName();
 	protected Matrix4f transformation_ = Matrix4f.identityMatrix();
-	private Matrix4f tmpTransformation_ = Matrix4f.identityMatrix();
+	protected Matrix4f tmpTransformation_ = Matrix4f.identityMatrix();
 	
 	protected FloatBuffer verticesBuffer_ = null;
 	protected ShortBuffer indicesBuffer_ = null;
@@ -47,6 +47,9 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 	private boolean finishedAxisSelection_;
 	private boolean isFocused_ = false;
 	private boolean isSelected_ = false;
+	
+	// for picking
+	protected float boundingBallRadius_ = 0.f;
 	
 	abstract public void draw(GL10 gl);
 	//abstract public void draw(GL10 gl, EnumOperationMode mode, Matrix4f transform);
@@ -415,6 +418,11 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 			return new Vector3f(transP.toArray(), 0);	
 
 		}
+	}
+	public void reset() {
+		// TODO Auto-generated method stub
+		this.transformation_ = Matrix4f.identityMatrix();
+		this.tmpTransformation_ = Matrix4f.identityMatrix();
 	}
 	
 }

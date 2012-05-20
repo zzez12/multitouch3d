@@ -3,6 +3,7 @@ package zhl.Android.Multitouch.render;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import zhl.Android.Multitouch.paint.MultiTouchPaintingActivity;
 import zhl.Android.Multitouch.touch.ZFingerRegister;
 import zhl.Android.Multitouch.touch.ZFingerRegisterListener;
 import zhl.Android.math.Matrix4f;
@@ -14,6 +15,7 @@ import zhl.Android.scenes.ZDataManager;
 import zhl.Android.scenes.ZMesh;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -43,8 +45,22 @@ public class ZView extends GLSurfaceView {
 
 	public ZView(Context context) {
 		super(context);
-		//init();
-		
+		init();
+	}
+	
+	// necessary constructor when using resource file for extension
+	public ZView(Context context, AttributeSet ats) {
+		super(context, ats);
+		init();
+	}
+	
+	// necessary constructor when using resource file for extension
+//	public ZView(Context context, AttributeSet ats, int defaultStyle) {
+//		super(context, ats, defaultStyle);
+//		init();
+//	}
+	
+	private void init() {
 		// prepare data
 		try {
 			initMesh();
@@ -60,13 +76,13 @@ public class ZView extends GLSurfaceView {
 		//setGestureDetect(new GestureDetector(new ZOneTouchListener(this)));
 		//this.setLongClickable(true);
 		//setScaleDetect(new ScaleGestureDetector(context, new ZTwoTouchListener(this)));
-		fingerDetect_ = new ZFingerRegister(context, new ZFingerRegisterListener(this));
+		fingerDetect_ = new ZFingerRegister(this.getContext(), new ZFingerRegisterListener(this));
 		//fingerDetect_ = new ZFingerRegister(context, null);
 		
 		// prepare renderer
 		setViewRenderer(new ZRenderer(this));
-		setRenderer(getRenderer());	
-		updateRenderData();
+		setRenderer(getRenderer());
+		//updateRenderData();
 	}
 	
 	public Trackball getTrackball() { 
@@ -75,8 +91,8 @@ public class ZView extends GLSurfaceView {
 	
 	public void initMesh() throws FileNotFoundException, IOException {
 		ZDataManager.getDataManager().addMesh(ZMesh.strNameSphere);
-		ZDataManager.getDataManager().addMesh(ZMesh.strName01);
-		ZDataManager.getDataManager().addMesh(ZMesh.strNameCone);
+		//ZDataManager.getDataManager().addMesh(ZMesh.strName01);
+		//ZDataManager.getDataManager().addMesh(ZMesh.strNameCone);
 		
 		Log.d(LOG_TAG, "Mesh initialized.");
 	}
@@ -154,7 +170,15 @@ public class ZView extends GLSurfaceView {
 		this.renderer_ = renderer_;
 	}
 
-	public void updateRenderData() {
-		getRenderer().addData(ZDataManager.getDataManager().getAllObject3D());
+//	public void updateRenderData() {
+//		getRenderer().addData(ZDataManager.getDataManager().getAllObject3D());
+//	}
+	
+	public void setToolTipText(String text) {
+		Context context = this.getContext();
+		if (context instanceof MultiTouchPaintingActivity) {
+			MultiTouchPaintingActivity mtpa = (MultiTouchPaintingActivity)context;
+			mtpa.setToolTipText(text);
+		}
 	}
 }

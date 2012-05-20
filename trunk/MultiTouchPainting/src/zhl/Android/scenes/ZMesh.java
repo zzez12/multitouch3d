@@ -140,11 +140,18 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 	}
 	
 	public ZMesh(ZMesh mesh) {
-		// UNDO
 		if (mesh.meshData_!=null) {
 			meshData_ = new ZSimpleMeshData(mesh.meshData_);
 		}
+		this.transformation_ = new Matrix4f(mesh.transformation_);
+		this.tmpTransformation_ = new Matrix4f(mesh.tmpTransformation_);
+		init();
+	}
+	
+	private void init() {
+		this.updateCenter();
 		prepareBuffers();
+		this.buildAxes();
 	}
 	
 //	private boolean parseOBJ() {
@@ -202,7 +209,6 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 		return false;
 	}
 	
-	
 	@Override
 	/*
 	 * (non-Javadoc)
@@ -211,10 +217,19 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 	public boolean pick(ZProjector proj, float x, float y) {
 		// TODO Auto-generated method stub
 		Log.d(LOG_TAG, this.getName() + "--Begin to pick.");
+		ZDataManager.getDataManager().getTimer().tagTime();
 		getPickedObjs().clear();
 		proj.unProject(x, y);
 		Vector3f stPt = proj.getRayStart();
 		Vector3f edPt = proj.getRayEnd();
+		
+		// quick test whether intersects with bounding ball
+		Vector3f ballCenter = getCurrentVector(objCenter_, true, false);
+		if (!ZAlgorithms.intersectBallByRay(stPt, edPt, ballCenter, boundingBallRadius_)) {
+			Log.d(LOG_TAG, " Not intersect by ball" + "--time:"+ZDataManager.getDataManager().getTimer().getDurationFromTagTime());
+			return false;
+		}
+		
 		TreeMap<Float, Integer> tmPickedObjs = new TreeMap<Float, Integer>();
 		int count = 0;
 		for (int i=0; i<meshData_.nFaces_; i++) {
@@ -241,32 +256,19 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 		}
 		// save the picked objs
 		String strPicked = "" + tmPickedObjs.size() + "(" + count + ")" + ": ";
-//		for (Integer it : tmPickedObjs.values()) {
-//			pickedObjs_.add(it);
-//			strPicked += it + " ";
-//		}
 		for (Float f : tmPickedObjs.keySet()) {
 			getPickedObjs().add(f);
 			strPicked += f + " ";
 		}
-//		String strPicked = ""+pickedObjs_.size() + ":";
-//		for (Object obj:pickedObjs_) {
-//			if (obj instanceof Integer) {
-//				int o = ((Integer)obj).intValue();
-//				strPicked += o + " ";
-//			}
-//		}
-		Log.d(LOG_TAG, strPicked);
+
+		Log.d(LOG_TAG, strPicked + "--time:"+ZDataManager.getDataManager().getTimer().getDurationFromTagTime());
 		if (!getPickedObjs().isEmpty()) {
-			//this.setSelected(true);
 			return true;
 		} 
 		else
 		{
-			//this.setSelected(false);
 			return false;
 		}
-		//return !getPickedObjs().isEmpty();
 	}
 	
 	public void updateVerticeColor() {
@@ -396,6 +398,7 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 				zMax = Math.max(zMax, meshData_.verticesPos_[j+2]);
 			}
 			objCenter_.set((xMin+xMax)*0.5f, (yMin+yMax)*0.5f, (zMin+zMax)*0.5f);
+			boundingBallRadius_ = (float)Math.sqrt((xMax-xMin)*(xMax-xMin)+(yMax-yMin)*(yMax-yMin)+(zMax-zMin)*(zMax-zMin));
 		}
 	}
 

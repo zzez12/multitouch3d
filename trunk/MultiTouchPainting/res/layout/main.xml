@@ -1,12 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
-
+    android:layout_height="fill_parent" >
+
     <TextView
-        android:layout_width="fill_parent"
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/Title" >
 
-</LinearLayout>
+    </TextView>
+
+    <Button
+        android:id="@+id/bnReset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:onClick = "clickHandler"
+        android:text="@string/bnReset" />
+
+    <TextView
+        android:id="@+id/tvToolTip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:text="TextView" />
+
+    <zhl.Android.Multitouch.render.ZView
+        android:id="@+id/zView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/tvToolTip"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/bnReset"
+        android:layout_weight="0.75" />
+
+    <ImageButton
+        android:id="@+id/imaBnCube"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/zView1"
+        android:background="#e0000000"
+        android:onClick = "clickHandler"
+        android:src="@drawable/cube2" />
+
+    <ImageButton
+        android:id="@+id/imaBnCylinder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/zView1"
+        android:layout_toRightOf="@+id/imaBnCube"
+        android:background="#e0000000"
+        android:onClick = "clickHandler"
+        android:src="@drawable/cylinder2" />
+
+    <ImageButton
+        android:id="@+id/imaBnSphere"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/zView1"
+        android:layout_toRightOf="@+id/imaBnCylinder"
+        android:background="#e0000000"
+        android:onClick = "clickHandler"
+        android:src="@drawable/shpere2" />
+
+    <ImageButton
+        android:id="@+id/imaBnCone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/zView1"
+        android:layout_toRightOf="@+id/imaBnSphere"
+        android:background="#e0000000"
+        android:onClick = "clickHandler"
+        android:src="@drawable/cone2" />
+
+    <ImageButton
+        android:id="@+id/imaBnDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/bnReset"
+        android:background="#e0000000"
+        android:onClick = "clickHandler"
+        android:src="@drawable/cross" />
+
+</RelativeLayout>

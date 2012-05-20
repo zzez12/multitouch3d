@@ -116,7 +116,7 @@ public class ZFingerRegister {
 	 * Used for generation of OnGroupHold events.
 	 * Default value is 30.
 	 */
-	public int moveDistance_ = 30;		// in pixels
+	public int moveDistance_ = 40;		// in pixels
 	/*
 	 * Maximum tapping time for determining single taps.
 	 * Default value is 500 (in millisecond).
@@ -149,7 +149,7 @@ public class ZFingerRegister {
 	}
 	
 	synchronized public void addTouchPoint(int id, float x, float y) {
-		Log.d(LOG_TAG, "addTouchPoint()");
+		//Log.d(LOG_TAG, "addTouchPoint()");
 		// remove old record if exist
 		if (this.getTouchRecords().get(id)!=null) {
 			this.getTouchRecords().remove(id);
@@ -268,7 +268,7 @@ public class ZFingerRegister {
 				r.lastListX_ = r.prevX_;
 				r.lastListY_ = r.prevY_;
 				longMove = true;
-				Log.d(LOG_TAG, "LongMove!");
+				//Log.d(LOG_TAG, "LongMove! " + sqDis);
 			}
 		}
 		else {
@@ -291,7 +291,7 @@ public class ZFingerRegister {
 			TouchTransformationMode oldMode = r.group_.transformationMode_;
 			r.group_.computeTransformation();
 			TouchTransformationMode newMode = r.group_.transformationMode_;
-			Log.d(LOG_TAG, "old: " + oldMode + "  new: " + newMode);
+			//Log.d(LOG_TAG, "old: " + oldMode + "  new: " + newMode);
 			if (oldMode==TouchTransformationMode.Unknown && newMode !=TouchTransformationMode.Unknown) {
 				// generate group start transformation event
 				listener_.onGroupStartTransform(this, r.group_);
@@ -547,45 +547,53 @@ public class ZFingerRegister {
 	private ZTimer timer_ = new ZTimer();
 
 
-	public boolean onTouchEvent(MotionEvent event) {
+	synchronized public boolean onTouchEvent(MotionEvent event) {
 		final int action = event.getActionMasked();
 		switch (action) {
 		case MotionEvent.ACTION_DOWN:
-			//Log.d(LOG_TAG, "Motion Down! n:" + event.getPointerCount() + " id:" + event.getActionIndex());
+			//Log.d(LOG_TAG, "Motion Down! n:" + event.getPointerCount() + " id:" + event.getPointerId(event.getActionIndex()));
 			for (int i=0; i<event.getPointerCount(); i++) {
 				int id = event.getPointerId(i);
 				this.addTouchPoint(id, event.getX(id), event.getY(id));
 			}
 			break;
 		case MotionEvent.ACTION_MOVE:
-			//Log.d(LOG_TAG, "Motion Move! n:" + event.getPointerCount() + " id:" + event.getActionIndex());
+			//Log.d(LOG_TAG, "Motion Move! n:" + event.getPointerCount() + " id:" + event.getPointerId(event.getActionIndex()));
 			for (int i=0; i<event.getPointerCount(); i++) {
 				int id = event.getPointerId(i);
+				//Log.d(LOG_TAG, " --> id:" + id + "(" + event.getX(id) + "," + event.getY(id) + ")");
 				this.moveTouchPoint(id, event.getX(id), event.getY(id));
 			}
 			break;
 		case MotionEvent.ACTION_UP:
-			//Log.d(LOG_TAG, "Motion Up! n:" + event.getPointerCount() + " id:" + event.getActionIndex());
+			//Log.d(LOG_TAG, "Motion Up! n:" + event.getPointerCount() + " id:" + event.getPointerId(event.getActionIndex()));
 			for (int i=0; i<event.getPointerCount(); i++) {
 				int id = event.getPointerId(i);
 				this.removeTouchPoint(id, event.getX(id), event.getY(id));
 			}
+			//currentStatus();
+			
 			break;
 		case MotionEvent.ACTION_POINTER_DOWN:{
-			//Log.d(LOG_TAG, "Motion Pointer Down! n:" + event.getPointerCount() + " id:" + event.getActionIndex());
-			int id = event.getActionIndex();
+			//Log.d(LOG_TAG, "Motion Pointer Down! n:" + event.getPointerCount() + " id:" + event.getPointerId(event.getActionIndex()));
+			int id = event.getPointerId(event.getActionIndex());
 			this.addTouchPoint(id, event.getX(id), event.getY(id));
 			break;		
 		}
 		case MotionEvent.ACTION_POINTER_UP: {
-			//Log.d(LOG_TAG, "Motion Pointer Up! n:" + event.getPointerCount() + " id:" + event.getActionIndex());
-			int id = event.getActionIndex();
+			//Log.d(LOG_TAG, "Motion Pointer Up! n:" + event.getPointerCount() + " id:" + event.getPointerId(event.getActionIndex()));
+			int id = event.getPointerId(event.getActionIndex());
 			this.removeTouchPoint(id, event.getX(id), event.getY(id));
+			//currentStatus();
 			break;
 		}
 
 		}
 		return false;
+	}
+	
+	public void currentStatus() {
+		Log.d(LOG_TAG, "---"+touchGroups_.size());
 	}
 	
 }

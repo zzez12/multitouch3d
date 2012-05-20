@@ -60,10 +60,10 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		this.view_ = view;
 	}
 	
-	public void onGroupCreate(Object sender, ZTouchGroup group) {	
+	synchronized public void onGroupCreate(Object sender, ZTouchGroup group) {	
 	}
 
-	public void onGroupRemove(Object sender, ZTouchGroup group) {
+	synchronized public void onGroupRemove(Object sender, ZTouchGroup group) {
 		// TODO Auto-generated method stub
 		//Log.d(LOG_TAG, "onGroupRemove()"  + currentStatus());
 		
@@ -79,6 +79,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			view_.endTransformation();
 			view_.getTrackball().end();
 			this.operationMode_ = EnumOperationMode.Unknown;
+			view_.setToolTipText(operationMode_.toString());
 			
 			// update axes
 			if (this.focusObject_ != null) {
@@ -105,7 +106,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			this.focusObject_.setSelectedPlaneAxes(null);
 			//this.currTouchTransformation_ = Matrix4f.identityMatrix();
 			this.operationMode_ = EnumOperationMode.Unknown;
-			
+			view_.setToolTipText(operationMode_.toString());
 		}
 		
 		/// active snapping
@@ -129,10 +130,10 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		}
 	}
 
-	public void onGroupMove(Object sender, ZTouchGroup group,
+	synchronized public void onGroupMove(Object sender, ZTouchGroup group,
 			ZTouchRecord record) {
 		// TODO Auto-generated method stub
-		Log.d(LOG_TAG, "onGroupMove()"  + currentStatus());
+		//Log.d(LOG_TAG, "onGroupMove()"  + currentStatus());
 		//Log.d(LOG_TAG, " group: " + group.currentStatus());
 		//if (record!=null) Log.d(LOG_TAG, " record:" + record.currentStatus());
 		
@@ -145,7 +146,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			&& record.moved_) {
 			float x = record.x_;
 			float y = view_.getHeight() - record.y_;
-			Vector2f p = new Vector2f(x, y);
+			Vector2f p = new Vector2f(x, y); 
 			view_.getTrackball().click(p, Trackball.MotionType.Rotation);
 			this.operationMode_ = EnumOperationMode.GlobalRotation;
 			this.globalRotationTouchRecord_ = record;
@@ -407,7 +408,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		}
 	}
 
-	public void onGroupLongMove(Object sender, ZTouchGroup group,
+	synchronized public void onGroupLongMove(Object sender, ZTouchGroup group,
 			ZTouchRecord record) {
 		// TODO Auto-generated method stub
 		//Log.d(LOG_TAG, "onGroupLongMove()"  + currentStatus());
@@ -489,7 +490,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		}
 	}
 
-	public void onGroupStartTransform(Object sender, ZTouchGroup group) {
+	synchronized public void onGroupStartTransform(Object sender, ZTouchGroup group) {
 		// TODO Auto-generated method stub
 		Log.d(LOG_TAG, "onGroupStartTransform()"  + currentStatus());
 		Log.d(LOG_TAG, " group: " + group.currentStatus());
@@ -538,6 +539,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			&& group.touchRecords_.size()>=4
 			&& group.palm_ == EnumPalm.Left) {
 			operationMode_ = EnumOperationMode.UniformScale;
+			view_.setToolTipText(operationMode_.toString());
 		}
 		
 		/// start axis translation / axis rotation
@@ -573,6 +575,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 				 this.operationMode_ = EnumOperationMode.Rotation;
 			 }
 			 this.focusObject_.setFinishedAxisSelection(true);
+			 view_.setToolTipText(operationMode_.toString());
 		}
 		
 		/// start axis scaling
@@ -587,6 +590,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			&& group.touchRecords_.size()==2) {
 			this.focusObject_.setFinishedAxisSelection(true);
 			this.operationMode_ = EnumOperationMode.Scaling;
+			view_.setToolTipText(operationMode_.toString());
 		}
 		
 		/// start planner translation
@@ -599,6 +603,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			&& group.touchRecords_.size()==2) {
 			this.focusObject_.setFinishedAxisSelection(true);
 			this.operationMode_ = EnumOperationMode.PlannerTranslation;
+			view_.setToolTipText(operationMode_.toString());
 		}
 		
 		/// start planner scaling
@@ -612,6 +617,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			&& group.touchRecords_.size()==2) {
 			this.focusObject_.setFinishedAxisSelection(true);
 			this.operationMode_ = EnumOperationMode.PlannerScaling;
+			view_.setToolTipText(operationMode_.toString());
 		}
 		
 		/// start copying object
@@ -651,6 +657,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 				newObj.setSelected(true);
 				newObj.show();
 				ZDataManager.getDataManager().getAllObject3D().add(newObj);
+				//view_.updateRenderData();
 				newObjectSet.add(newObj);
 				
 				if (obj == this.focusObject_) {
@@ -669,6 +676,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 					this.focusObject_.setFinishedAxisSelection(true);
 					this.operationMode_ = EnumOperationMode.Translation;
 					
+					view_.setToolTipText("Copy " + ZDataManager.getDataManager().getAllObject3D().size());
 				}
 				this.selectedObjects_ = newObjectSet;
 			}
@@ -677,16 +685,18 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		Log.d(LOG_TAG, "~onGroupStartTransform()"  + currentStatus());
 	}
 
-	public void onGroupTap(Object sender, ZTouchGroup group) {
+	synchronized public void onGroupTap(Object sender, ZTouchGroup group) {
 		// TODO Auto-generated method stub
-		//Log.d(LOG_TAG, "onGroupTap()"  + currentStatus());
+		Log.d(LOG_TAG, "onGroupTap()"  + currentStatus());
+		
+		view_.setToolTipText(group.oldTouchRecords_.size() + " finger(s) tap");
 		
 		float x = group.cx_;
 		float y = view_.getHeight() - group.cy_;
 		
 		/// pick and hide 2D object under tap point
 		if (group.oldTouchRecords_.size()==1) {
-			// TODO
+			// TODO 
 		}
 		
 		/// one-point tap - pick 3D object
@@ -761,7 +771,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		//Log.d(LOG_TAG, "onGroupTap()"  + currentStatus());
 	}
 
-	public void onGroupDoubleTap(Object sender, ZTouchGroup group) {
+	synchronized public void onGroupDoubleTap(Object sender, ZTouchGroup group) {
 		// TODO Auto-generated method stub
 		//Log.d(LOG_TAG, "onGroupDoubleTap()"  + currentStatus());
 		
@@ -784,9 +794,10 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		}
 	}
 
-	public void onGroupHold(Object sender, ZTouchGroup group) {
+	synchronized public void onGroupHold(Object sender, ZTouchGroup group) {
 		// TODO Auto-generated method stub
 		//Log.d(LOG_TAG, "onGroupHold()"  + currentStatus());
+		view_.setToolTipText(group.touchRecords_.size() + " finger(s) hold");
 		
 		// pick reference object
 		if (operationMode_ == EnumOperationMode.Unknown
@@ -822,7 +833,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		}
 	}
 
-	public void onGroupAddPoint(Object sender, ZTouchGroup group,
+	synchronized public void onGroupAddPoint(Object sender, ZTouchGroup group,
 			ZTouchRecord record) {
 		// TODO Auto-generated method stub
 		//Log.d(LOG_TAG, "onGroupAddPoint()" + currentStatus());
@@ -899,7 +910,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		//Log.d(LOG_TAG, " group: " + group.currentStatus());
 	}
 
-	public void onGroupRemovePoint(Object sender, ZTouchGroup group,
+	synchronized public void onGroupRemovePoint(Object sender, ZTouchGroup group,
 			ZTouchRecord record) {
 		// TODO Auto-generated method stub
 		//Log.d(LOG_TAG, "onGroupRemovePoint()");
@@ -939,7 +950,8 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 //		ZLine3D line = view_.getProjector().getRayLineFromTouchPoint(x, y);
 //		ZDataManager.getDataManager().getAllObject3D().add(line);
 //		view_.updateRenderData();
-//		Log.d(LOG_TAG, ZDataManager.getDataManager().getAllObject3D().size() + " " + line.toString());
+		Log.d(LOG_TAG, "Pick3D!");
+		ZDataManager.getDataManager().getTimer().tagTime();
 		// update projector
 		// iterative check all 3D objects
 		ZObject3D pickedObj = null;
@@ -956,6 +968,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 				}
 			}
 		}
+		Log.d(LOG_TAG, " time:" + ZDataManager.getDataManager().getTimer().getDurationFromTagTime() + " picked:" + pickedObj);
 		return pickedObj;
 	}
 	

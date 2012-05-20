@@ -22,6 +22,23 @@ public class ZAlgorithms {
 		return false;
 	}
 	
+	public static boolean intersectBallByRay(Vector3f rayStart, Vector3f rayEnd, Vector3f ballCenter, float ballRadius) {
+		//boolean bRet = false;
+		float rsc = rayStart.minus(ballCenter).length();
+		float rec = rayEnd.minus(ballCenter).length();
+		if ((rsc-ballRadius)*(rec-ballRadius)<0) return true;	// one inside, and the other outside
+		else if (rsc<ballRadius && rec<ballRadius) return false; // two are both inside
+		else {	// two are both outside
+			Vector3f dir = rayStart.minus(rayEnd).normalize();
+			float t = rayStart.minus(ballCenter).dot(dir);
+			Vector3f projV = rayStart.minus(dir.times(t));
+			float rpc = projV.minus(ballCenter).length();
+			if (rpc<ballRadius) return true;
+			else return false;
+		}
+		//return bRet;
+	}
+	
 	public static final class TriangleIntersection {
 		public int intersection;
 		public Vector3f intersectionP = null;
