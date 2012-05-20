@@ -148,4 +148,17 @@ public class Matrix4f {
 		return m;
 	}
 
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		String str = "[";
+		for (int i=0; i<len_; i++) {
+			str += e_[i] + " ";
+		}
+		str += "]";
+		return str;
+	}
+	
+	
+
 }

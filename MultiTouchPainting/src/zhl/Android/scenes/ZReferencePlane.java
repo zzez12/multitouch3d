@@ -27,6 +27,7 @@ public class ZReferencePlane extends ZObject3D {
 		float h = -1.f;
 		float []verts = new float[(blocks*2+1)*3*4];
 		short []indices = new short[(blocks*2+1)*4];
+		float []colors = new float[(blocks*2+1)*4*4];
 		int j=0, k=0;
 		for (int i=-blocks; i<=blocks; i++, j+=3*4, k+=4) {
 			verts[j+0] = i*step; verts[j+1] = h; verts[j+2] = -size;
@@ -37,9 +38,17 @@ public class ZReferencePlane extends ZObject3D {
 				indices[k+kk] = (short)(k+kk);
 			}
 		}
+		j=0;
+		for (int i=0; i<(blocks*2+1)*4; i++, j+=4) {
+			colors[j+0] = planeColor_[0];
+			colors[j+1] = planeColor_[1];
+			colors[j+2] = planeColor_[2];
+			colors[j+3] = planeColor_[3];
+		}
 		setVertices(verts);
 		setIndices(indices);
-		setColor(planeColor_[0], planeColor_[1], planeColor_[2], planeColor_[3]);
+		//setColor(planeColor_[0], planeColor_[1], planeColor_[2], planeColor_[3]);
+		setColor(colors);
 	}
 
 	@Override

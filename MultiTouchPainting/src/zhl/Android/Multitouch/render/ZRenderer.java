@@ -81,7 +81,7 @@ public class ZRenderer implements GLSurfaceView.Renderer {
 		setGL(gl);
 		initOpenGL(gl);
 		initTrackball();
-		updateData(gl);
+//		updateData(gl);
 	}
 
 	public ZMeshRenderer getMeshRenderer_() {
@@ -119,9 +119,9 @@ public class ZRenderer implements GLSurfaceView.Renderer {
 		gl.glMaterialx(GL10.GL_FRONT, GL10.GL_SHININESS, 128);
 	}
 	
-	private void updateData(GL10 gl) {
-		meshRenderer_.updateData(gl);
-	}
+//	private void updateData(GL10 gl) {
+//		meshRenderer_.updateData(gl);
+//	}
 	
 	private void start3DRendering(GL10 gl) {
 		//Matrix4f m = globalTrackball_.getMatrix();
@@ -202,19 +202,19 @@ public class ZRenderer implements GLSurfaceView.Renderer {
 		this.height_ = height_;
 	}
 	
-	public void addData(Object obj) {
-		//if (obj instanceof ZMesh || obj instanceof ZMeshGroup) {
-		if (obj instanceof ZObject3D ) {
-			meshRenderer_.addMesh(obj);
-		} else if (obj instanceof ArrayList) {
-			@SuppressWarnings("unchecked")
-			ArrayList<ZObject3D> objs = (ArrayList<ZObject3D>)obj;
-			for (ZObject3D obj3D : objs) {
-				meshRenderer_.addMesh(obj3D);
-			}
-		}
-		Log.d(LOG_TAG, "addData finished.");
-	}
+//	public void addData(Object obj) {
+//		//if (obj instanceof ZMesh || obj instanceof ZMeshGroup) {
+//		if (obj instanceof ZObject3D ) {
+//			meshRenderer_.addMesh(obj);
+//		} else if (obj instanceof ArrayList) {
+//			@SuppressWarnings("unchecked")
+//			ArrayList<ZObject3D> objs = (ArrayList<ZObject3D>)obj;
+//			for (ZObject3D obj3D : objs) {
+//				meshRenderer_.addMesh(obj3D);
+//			}
+//		}
+//		Log.d(LOG_TAG, "addData finished.");
+//	}
 	
 	public void updateProjector() {
 		Trackball tb = getTrackball();

@@ -1,5 +1,6 @@
 package zhl.Android.Multitouch.touch;
 
+import java.util.Stack;
 import java.util.Timer;
 
 import android.os.Handler;
@@ -20,7 +21,7 @@ public class ZTimer {
 	public long createTime_;
 	public long stopTime_;
 	public long currentTick_;
-	
+	private Stack<Long> tagTimes_ = new Stack<Long>();
 	
 	public ZTimer() {
 		start();
@@ -28,6 +29,7 @@ public class ZTimer {
 	
 	public void start() {
 		createTime_ = System.currentTimeMillis();
+		stopTime_ = createTime_;
 	}
 	
 	public void stop() {
@@ -41,5 +43,15 @@ public class ZTimer {
 	
 	public long getDuration() {
 		return stopTime_ - createTime_;
+	}
+	
+	public void tagTime() {
+		tagTimes_.push(System.currentTimeMillis());
+	}
+	
+	public long getDurationFromTagTime() {
+		long curT = System.currentTimeMillis();
+		long tagT = tagTimes_.pop();
+		return curT - tagT;
 	}
 }
