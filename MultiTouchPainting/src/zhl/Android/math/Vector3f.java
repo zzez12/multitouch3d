@@ -1,8 +1,8 @@
 package zhl.Android.math;
 
 public class Vector3f {
-	public static final Vector3f MinValue = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-	public static final Vector3f MaxValue = new Vector3f(Float.MIN_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
+	public static final Vector3f MaxValue = new Vector3f(Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+	public static final Vector3f MinValue = new Vector3f(-Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE);
 	
 	public float x_, y_, z_;
 	
@@ -136,6 +136,14 @@ public class Vector3f {
 		return m;
 	}
 	
+	public Vector3f max(Vector3f p) {
+		return new Vector3f(Math.max(x_, p.x_), Math.max(y_, p.y_), Math.max(z_, p.z_));
+	}
+	
+	public Vector3f min(Vector3f p) {
+		return new Vector3f(Math.min(x_, p.x_), Math.min(y_, p.y_), Math.min(z_, p.z_));		
+	}
+	
 	public static Vector3f plus(Vector3f v0, Vector3f v1) {
 		return new Vector3f(v0.x_+v1.x_, v0.y_+v1.y_, v0.z_+v1.z_);
 	}
@@ -150,5 +158,13 @@ public class Vector3f {
 	}
 	public static Vector3f divide(Vector3f v, float f) {
 		return new Vector3f(v.x_/f, v.y_/f, v.z_/f);
+	}
+	
+	public static Vector3f max(Vector3f p, Vector3f q) {
+		return p.max(q);
+	}
+	
+	public static Vector3f min(Vector3f p, Vector3f q) {
+		return p.min(q);
 	}
 }

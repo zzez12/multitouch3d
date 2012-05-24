@@ -109,6 +109,20 @@ public class Matrix4f {
 		return ret;
 	}
 	
+	public Matrix4f preMultiply(Matrix4f m) {
+		Matrix4f ret = new Matrix4f();
+		for (int x=0; x<row_size_; x++)
+			for (int y=0; y<col_size_; y++) {
+				float f = 0.f;
+				for (int k=0; k<col_size_; k++) {
+					//f += get(x, k)*m.get(k, y);
+					f += m.get(x, k)*get(k, y);
+				}
+				ret.set(x, y, f);
+			}
+		return ret;
+	}
+	
 	public Matrix4f times(float f) {
 		Matrix4f ret = new Matrix4f();
 		for (int i=0; i<len_; i++)

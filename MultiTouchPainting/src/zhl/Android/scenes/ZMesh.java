@@ -150,8 +150,10 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 	
 	private void init() {
 		this.updateCenter();
-		prepareBuffers();
 		this.buildAxes();
+		this.buildSnapPlanes();
+		makeDirty();
+		prepareBuffers();
 	}
 	
 //	private boolean parseOBJ() {
@@ -184,10 +186,14 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 						axis.draw(gl);
 					}
 				}
-				else {
-					obj.draw(gl);
-				}
 			}			
+		}
+		// draw snap-planes
+		for (ZObject3D obj : getChildObjects()) {
+			if (obj instanceof ZSnapPlane) {
+				ZSnapPlane snapPlane = (ZSnapPlane)obj;
+				snapPlane.draw(gl);
+			}
 		}
 		gl.glPopMatrix();
 
@@ -198,9 +204,11 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 		ZParseOBJ.ZBuffers buffer = ZParseOBJ.parse(new FileReader(fileName));
 		float [] normals = buildNormals(buffer.verticesPos, buffer.faceIndices);
 		this.buildMeshData(buffer.verticesPos, buffer.faceIndices, null, normals);
-		updateCenter();
-		makeDirty();
 		this.setName(fileName);
+		init();
+		//updateCenter();
+		//makeDirty();
+		
 		return true;
 	}
 
@@ -359,6 +367,67 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 		this.addChildObject(zAxis);
 	}
 	
+	public void buildSnapPlanes() {
+		// TODO
+		Vector3f maxCoordinate = this.maxCoord();
+		Vector3f minCoordinate = this.minCoord();
+		float x1 = minCoordinate.x_;
+		float y1 = minCoordinate.y_;
+		float z1 = minCoordinate.z_;
+		float x2 = maxCoordinate.x_;
+		float y2 = maxCoordinate.y_;
+		float z2 = maxCoordinate.z_;
+		
+		// front
+		Vector3f c = new Vector3f((x2+x1)/2, (y2+y1)/2, z1);
+		Vector3f f1 = new Vector3f((x2-x1)/2, 0, 0);
+		Vector3f f2 = new Vector3f(0, (y2-y1)/2, 0);
+		ZSnapPlane p = new ZSnapPlane(c, f1, f2);
+		this.addChildObject(p);
+		
+		// back
+		c = new Vector3f((x2+x1)/2, (y2+y1)/2, z2);
+		f1 = new Vector3f((x1-x2)/2, 0, 0);
+		f2 = new Vector3f(0, (y2-y1)/2, 0);
+		this.addChildObject(new ZSnapPlane(c, f1, f2));
+		
+		// left
+		c = new Vector3f(x1, (y2+y1)/2, (z1+z2)/2);
+		f1 = new Vector3f(0, 0, (z1-z2)/2);
+		f2 = new Vector3f(0, (y2-y1)/2, 0);
+		this.addChildObject(new ZSnapPlane(c, f1, f2));
+		
+		// right
+		if (this.getName().contains("tri.prism")==false) {
+            c = new Vector3f(x2, (y2 + y1) / 2, (z1 + z2) / 2);
+            f1 = new Vector3f(0, 0, (z2 - z1) / 2);
+            f2 = new Vector3f(0, (y2 - y1) / 2, 0);
+            this.addChildObject(new ZSnapPlane(c, f1, f2));
+		}
+		
+		// top
+		if (this.getName().contains("tri.prism")==false) {
+			c = new Vector3f((x1 + x2) / 2, y2, (z1 + z2) / 2);
+			f1 = new Vector3f((x1 - x2) / 2, 0, 0);
+			f2 = new Vector3f(0, 0, (z1 - z2) / 2);
+			this.addChildObject(new ZSnapPlane(c, f1, f2));
+		}
+		
+		// bottom
+		c = new Vector3f((x1 + x2) / 2, y1, (z1 + z2) / 2);
+		f1 = new Vector3f((x2 - x1) / 2, 0, 0);
+		f2 = new Vector3f(0, 0, (z1 - z2) / 2);
+		this.addChildObject(new ZSnapPlane(c, f1, f2));
+
+		// special
+		if (this.getName().contains("tri.prism")==true) {
+			c = new Vector3f((x1 + x2) / 2, (y2 + y1) / 2, (z1 + z2) / 2);
+			f1 = new Vector3f((x1 - x2) / 2, (y2 - y1) / 2, 0);
+			f2 = new Vector3f(0, 0, (z1 - z2) / 2);
+			this.addChildObject(new ZSnapPlane(c, f1, f2));
+		}
+	}
+	
 	public void applyObjTransformation(Matrix4f A) {
 		// update vertex positions
 		for (int i=0, j=0; i<meshData_.nVertices_; i++, j+=3) {
@@ -400,6 +469,26 @@ public class ZMesh extends ZObject3D implements ZMeshIO{
 			objCenter_.set((xMin+xMax)*0.5f, (yMin+yMax)*0.5f, (zMin+zMax)*0.5f);
 			boundingBallRadius_ = (float)Math.sqrt((xMax-xMin)*(xMax-xMin)+(yMax-yMin)*(yMax-yMin)+(zMax-zMin)*(zMax-zMin));
 		}
+	}
+	
+	public Vector3f maxCoord() {
+		if (meshData_==null) return null;//new Vector3f(0,0,0);
+		Vector3f ret = Vector3f.MinValue;
+		for (int i=0; i<meshData_.nVertices_; i++) {
+			Vector3f v = getVertex(i);
+			ret = Vector3f.max(ret, v);
+		}
+		return ret;
+	}
+	
+	public Vector3f minCoord() {
+		if (meshData_==null) return null;//new Vector3f(0,0,0);
+		Vector3f ret = Vector3f.MaxValue;
+		for (int i=0; i<meshData_.nVertices_; i++) {
+			Vector3f v = getVertex(i);
+			ret = Vector3f.min(ret, v);
+		}
+		return ret;
 	}
 
 	public Vector3f getVertex(int idx) {

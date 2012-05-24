@@ -89,5 +89,14 @@
         android:background="#e0000000"
         android:onClick = "clickHandler"
         android:src="@drawable/cross" />
+
+    <Button
+        android:id="@+id/bnClear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/bnReset"
+        android:onClick = "clickHandler"
+        android:text="@string/bnClear" />
 
 </RelativeLayout>
