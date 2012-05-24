@@ -42,14 +42,19 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 	private ZAxis[] selectedPlaneAxes_ = null;
 	private ZPolygon3D selectedPlaneObj_ = null;
 	private ZSnapPlane selectedSnapPlane_ = null;
-	protected Vector3f objCenter_ = new Vector3f();
 
 	private boolean finishedAxisSelection_;
 	private boolean isFocused_ = false;
 	private boolean isSelected_ = false;
 	
 	// for picking
+	protected Vector3f objCenter_ = new Vector3f();
 	protected float boundingBallRadius_ = 0.f;
+//	protected Vector3f maxCoord_ = new Vector3f();
+//	protected Vector3f minCoord_ = new Vector3f();
+	
+	// bounding data
+	
 	
 	abstract public void draw(GL10 gl);
 	//abstract public void draw(GL10 gl, EnumOperationMode mode, Matrix4f transform);
@@ -212,6 +217,11 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 	
 	public void deselectAllSnapPlanes() {
 		// TODO
+		for (ZObject3D obj:getChildObjects()) {
+			if (obj instanceof ZSnapPlane) {
+				obj.hide();
+			}
+		}
 	}
 
 	public ZAxis pickAxis(ZProjector proj, Vector2f touchOrientation) {
@@ -369,7 +379,14 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 		return selectedSnapPlane_;
 	}
 	public void setSelectedSnapPlane(ZSnapPlane selectedSnapPlane_) {
+		for (ZObject3D obj:getChildObjects()) {
+			if (obj instanceof ZSnapPlane) {
+				ZSnapPlane snapPlane = (ZSnapPlane)obj;
+				snapPlane.hide();
+			}
+		}
 		this.selectedSnapPlane_ = selectedSnapPlane_;
+		this.selectedSnapPlane_.show();
 	}
 	
 	public void updateCenter() {

@@ -26,6 +26,13 @@ public class Matrix3f {
 			for (int y=0; y<col_size_; y++)
 				set(x, y, arr[x][y]);
 	}
+	public Matrix3f(Vector3f v1, Vector3f v2, Vector3f v3) {
+		for (int i=0; i<row_size_; i++) {
+			set(i, 0, v1.get(i));
+			set(i, 1, v2.get(i));
+			set(i, 2, v3.get(i));
+		}
+	}
 	
 	public Matrix3f(Matrix3f m) {
 		

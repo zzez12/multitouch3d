@@ -23,6 +23,7 @@ import zhl.Android.scenes.ZLine3D;
 import zhl.Android.scenes.ZMesh;
 import zhl.Android.scenes.ZObject3D;
 import zhl.Android.scenes.ZAxis.AxisType;
+import zhl.Android.scenes.ZSnapPlane;
 
 public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterListener {
 
@@ -117,8 +118,14 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 				&& this.focusObject_ != touchObject_
 				&& this.focusObject_.getSelectedSnapPlane() != null
 				&& this.touchObject_.getSelectedSnapPlane() != null) {
-				//snapObject(focusObject_.getSelectedSnapPlane(), touchObject_.getSelectedSnapPlane());
+				snapObject(focusObject_.getSelectedSnapPlane(), touchObject_.getSelectedSnapPlane());
+				focusObject_.endTransformation();
 			}
+			
+			// update status
+			this.operationMode_ = EnumOperationMode.Unknown;
+			if (this.focusObject_!=null) this.focusObject_.deselectAllSnapPlanes();
+			if (this.touchObject_!=null) this.touchObject_.deselectAllSnapPlanes();
 		}
 		
 		// deselect axis and plane
@@ -411,7 +418,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 	synchronized public void onGroupLongMove(Object sender, ZTouchGroup group,
 			ZTouchRecord record) {
 		// TODO Auto-generated method stub
-		//Log.d(LOG_TAG, "onGroupLongMove()"  + currentStatus());
+		Log.d(LOG_TAG, "onGroupLongMove()"  + currentStatus());
 		//Log.d(LOG_TAG, " group: " + group.currentStatus());
 		//if (record!=null) Log.d(LOG_TAG, " record:" + record.currentStatus());
 		
@@ -430,13 +437,19 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		
 		// Unknown mode and 1 point moving on focused object -> start active snapping
 		if (operationMode_ == EnumOperationMode.Unknown
-			&& this.useSupportOpertaions_ == true
+			//&& this.useSupportOpertaions_ == true
 			&& group.oldTouchRecords_.size()==0
 			&& group.touchRecords_.size()==1
 			&& focusObject_ != null
 			&& focusObject_ == downObject_ 
 			&& record.prevListX_.size()>=2) {
 			// TODO
+			ZSnapPlane plane = pickSnapPlane(this.focusObject_, record);
+			if (plane!=null) {
+				this.focusObject_.setSelectedSnapPlane(plane);
+				this.operationMode_ = EnumOperationMode.ActiveSnap;
+				view_.setToolTipText(operationMode_.toString());
+			}
 		}
 		
 		// ActiveSnap mode and 1 point moving on any object -> active snapping (pick snap plane)
@@ -446,48 +459,53 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			&& touchObject_ != null
 			&& record.prevListX_.size() >= 2) {
 			// TODO
+			ZSnapPlane plane = pickSnapPlane(touchObject_, record);
+			if (plane!=null) {
+				touchObject_.setSelectedSnapPlane(plane);
+			}
 		}
 		
-		// two point contact -> pick axis / pick plane
-		if (operationMode_ == EnumOperationMode.Unknown
-			&& focusObject_ != null 
-			&& axisHoldCount_ < axisHoldThreshold_
-			&& group.oldTouchRecords_.size() ==0
-			&& group.touchRecords_.size() == 2) {
-			// if previous two-point tap found => select plane
-			// else select axis
-			Log.d(LOG_TAG, "Long-Time:" + group.touchRecords_.first().downTime_ + "-" + lastTwoTapDownTime_);
-			if (group.touchRecords_.first().downTime_ - lastTwoTapDownTime_ < 1000) {
-				ZAxis axis = pickAxis(group);
-				focusObject_.setSelectedAxis(axis);
-				ZAxis[] planeAxes = pickPlane(group);
-				focusObject_.setSelectedPlaneAxes(planeAxes);
-			}
-			else {
-				ZAxis axis = pickAxis(group);
-				focusObject_.setSelectedAxis(axis);
-				focusObject_.setSelectedPlaneAxes(null);
-			}
-			
-			ZTouchRecord r1 = group.touchRecords_.first();
-			ZTouchRecord r2 = group.touchRecords_.last();
-			r1.clear();
-			r2.clear();
-			
-			group.transformationMode_ = TouchTransformationMode.Unknown;
-			group.moved_ = false;
-			
-			// adjust axis hold time threshold
-			if (focusObject_.getSelectedAxis() != null) {
-//				float s = findClosestAxisAngle(focusObject_.getSelectedAxis());
-//				s = 1.f - (float)(Math.acos(s)/(Math.PI/2.f));
-//				if (Float.isNaN(s) || s<0 || s>1) s = 1;
-//				s = s*s;
-//				this.axisHoldThreshold_ = (int)(2+s*0);
-				this.axisHoldThreshold_ = 2;
-			}
-			this.axisHoldCount_ = 0; 
-		}
+		// these part may be unnecessary
+//		// two point contact -> pick axis / pick plane
+//		if (operationMode_ == EnumOperationMode.Unknown
+//			&& focusObject_ != null 
+//			&& axisHoldCount_ < axisHoldThreshold_
+//			&& group.oldTouchRecords_.size() ==0
+//			&& group.touchRecords_.size() == 2) {
+//			// if previous two-point tap found => select plane
+//			// else select axis
+//			Log.d(LOG_TAG, "Long-Time:" + group.touchRecords_.first().downTime_ + "-" + lastTwoTapDownTime_);
+//			if (group.touchRecords_.first().downTime_ - lastTwoTapDownTime_ < 1000) {
+//				ZAxis axis = pickAxis(group);
+//				focusObject_.setSelectedAxis(axis);
+//				ZAxis[] planeAxes = pickPlane(group);
+//				focusObject_.setSelectedPlaneAxes(planeAxes);
+//			}
+//			else {
+//				ZAxis axis = pickAxis(group);
+//				focusObject_.setSelectedAxis(axis);
+//				focusObject_.setSelectedPlaneAxes(null);
+//			}
+//			
+//			ZTouchRecord r1 = group.touchRecords_.first();
+//			ZTouchRecord r2 = group.touchRecords_.last();
+//			r1.clear();
+//			r2.clear();
+//			
+//			group.transformationMode_ = TouchTransformationMode.Unknown;
+//			group.moved_ = false;
+//			
+//			// adjust axis hold time threshold
+//			if (focusObject_.getSelectedAxis() != null) {
+////				float s = findClosestAxisAngle(focusObject_.getSelectedAxis());
+////				s = 1.f - (float)(Math.acos(s)/(Math.PI/2.f));
+////				if (Float.isNaN(s) || s<0 || s>1) s = 1;
+////				s = s*s;
+////				this.axisHoldThreshold_ = (int)(2+s*0);
+//				this.axisHoldThreshold_ = 2;
+//			}
+//			this.axisHoldCount_ = 0; 
+//		}
 	}
 
 	synchronized public void onGroupStartTransform(Object sender, ZTouchGroup group) {
@@ -1064,6 +1082,101 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		// return found two axes
 		if (i!=2) return null;
 		return orthogonalAxes;
+	}
+	
+	private ZSnapPlane pickSnapPlane(ZObject3D meshObj, ZTouchRecord record) {
+		Log.d(LOG_TAG, "Begin to pick snap-plane..");
+		// get stroke direction
+		// recrod.prevListX
+		float x1 = record.x_;
+		float y1 = view_.getHeight() - record.y_;
+		float x2 = record.prevListX_.getFirst();
+		float y2 = view_.getHeight() - record.prevListY_.getFirst();
+		float dx = x1 - x2;
+		float dy = y1 - y2;
+		Vector2f dir = new Vector2f(dx, dy).normalize();
+		
+		// find snap plane
+		float minError = Float.MAX_VALUE;
+		ZSnapPlane minPlane = null;
+		for (ZObject3D obj : meshObj.getChildObjects()) {
+			if (obj instanceof ZSnapPlane) {
+				ZSnapPlane plane = (ZSnapPlane)obj;
+				Vector3f p1 = view_.getProjector().project(plane.getPlaneCenter());
+				Vector3f p2 = view_.getProjector().project(plane.getPlaneCenter().plus(plane.getPlaneNormal()));
+				Vector2f dir2 = new Vector2f(p2.x_-p1.x_, p2.y_-p1.y_).normalize();
+				
+				float error = 0;
+				if (meshObj==this.focusObject_) 
+					error = 1.f - dir2.dot(dir);
+				else
+					error = 1.f + dir2.dot(dir);
+				
+				if (error<minError) {
+					minError = error;
+					minPlane = plane;
+				}
+			}
+		}
+		return minPlane;
+	}
+	
+	private void snapObject(ZSnapPlane source, ZSnapPlane target) {
+		if (source==null || target==null) return;
+		
+		// generate transformation matrix
+		Matrix4f transformM = Matrix4f.identityMatrix();
+		// apply translation
+		Vector3f disp = target.getPlaneCenter().minus(source.getPlaneCenter());
+		transformM = transformM.multiply(Matrix4f.translationMatrix(disp));
+		
+		// apply rotation
+		Vector3f n1 = source.getPlaneNormal().normalize();
+		Vector3f n2 = target.getPlaneNormal().normalize();
+		Vector3f f11 = source.getFrame1().normalize();
+		Vector3f f21 = target.getFrame1().normalize();
+		Vector3f f12 = source.getFrame2().normalize();
+		Vector3f f22 = target.getFrame2().normalize();
+		
+		// 1. get viewing direction
+		Vector3f c = source.getPlaneCenter();
+		//float[] P = view_.getProjector().getProjM();
+		float w = view_.getWidth()/2;
+		float h = view_.getHeight()/2;
+		Vector3f v = view_.getProjector().unProject(w, h, 0.f).minus(view_.getProjector().unProject(w, h, 1.f).normalize());
+		
+		// 2. find best orientation
+		float s11 = v.dot(f11) - v.dot(f22);
+		float s12 = v.dot(f12) - v.dot(f21);
+		float s1 = s11 * s11 + s12 * s12;
+		float s21 = v.dot(f11) - v.dot(f21);
+		float s22 = v.dot(f12) + v.dot(f22);
+		float s2 = s21 * s21 + s22 * s22;
+		float s31 = v.dot(f11) + v.dot(f22);
+		float s32 = v.dot(f12) + v.dot(f21);
+		float s3 = s31 * s31 + s32 * s32;
+		float s41 = v.dot(f11) + v.dot(f21);
+		float s42 = v.dot(f12) - v.dot(f22);
+		float s4 = s41 * s41 + s42 * s42;
+		s1 *= -1.f;
+		s2 *= -1.f;
+		s3 *= -1.f;
+		s4 *= -1.f;
+		Matrix3f D = new Matrix3f(n2.times(-1.f), f22, f21);
+		if (s1>s2 && s1>s3 && s1>s4) D = new Matrix3f(n2.times(-1.f), f22, f21);
+		if (s2>s1 && s2>s3 && s2>s4) D = new Matrix3f(n2.times(-1.f), f21, f22.times(-1.f));
+		if (s3>s1 && s3>s2 && s3>s4) D = new Matrix3f(n2.times(-1.f), f22.times(-1.f), f21.times(-1.f));
+		if (s4>s1 && s4>s2 && s4>s3) D = new Matrix3f(n2.times(-1.f), f21.times(-1.f), f22);
+		
+		// 3. build transformation matrix
+		Matrix3f B = new Matrix3f(n1, f11, f12);
+		D = D.multiply(B.inverse());
+		Matrix4f D4d = new Matrix4f(D);
+		D4d.set(3, 3, 1.f);
+		transformM = transformM.multiply(Matrix4f.translationMatrix(c)).multiply(D4d).multiply(Matrix4f.translationMatrix(c.times(-1.f)));
+		
+		// apply transformation 
+		this.focusObject_.setTmpTransformation(transformM);
 	}
 	
 	private String currentStatus() {

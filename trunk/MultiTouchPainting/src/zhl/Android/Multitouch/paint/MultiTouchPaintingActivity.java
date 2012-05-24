@@ -86,6 +86,9 @@ public class MultiTouchPaintingActivity extends Activity {
 		case R.id.imaBnDelete:
 			//ZDataManager.getDataManager().removeMeshes();
 			break;
+		case R.id.bnClear:
+			ZDataManager.getDataManager().clearAll();
+			break;
 		}
     }
     

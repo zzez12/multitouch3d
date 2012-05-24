@@ -31,7 +31,7 @@ public class ZDataManager {
 	public void addMesh(String str) throws FileNotFoundException, IOException {
 		ZMesh mesh = new ZMesh();
 		mesh.load(str);
-		mesh.buildAxes();
+		//mesh.buildAxes();
 		getDataManager().getAllObject3D().add(mesh);
 	}
 	
@@ -39,6 +39,10 @@ public class ZDataManager {
 		for (ZObject3D obj : getAllObject3D()) {
 			obj.reset();
 		}
+	}
+	
+	public void clearAll() {
+		allObject3D_ = new ArrayList<ZObject3D>();
 	}
 
 	public ZTimer getTimer() {

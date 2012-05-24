@@ -282,7 +282,7 @@ public class ZFingerRegister {
 				if (r.moved_) r.group_.moved_ = true;
 				// generate group move event
 				listener_.onGroupMove(this, r.group_, r);
-				//if (longMove) listener_.onGroupLongMove(this, r.group_, r);
+				if (longMove) listener_.onGroupLongMove(this, r.group_, r);
 			}
 		}
 		

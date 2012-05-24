@@ -4,5 +4,6 @@
     <string name="Title">Multitouch Framework</string>
     <string name="app_name">MultiTouch</string>
     <string name="bnReset">Reset</string>
+    <string name="bnClear">Clear</string>
 
 </resources>
