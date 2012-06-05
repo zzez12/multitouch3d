@@ -1,5 +1,6 @@
 package zhl.Android.Multitouch.render;
 
+import java.util.ConcurrentModificationException;
 import java.util.Vector;
 
 import javax.microedition.khronos.opengles.GL10;
@@ -18,18 +19,16 @@ public class ZMeshRenderer {
 	private Vector<Object> toRenderObjs = new Vector<Object>();
 	
 	synchronized public void draw(GL10 gl) {
-		for (ZObject3D obj : ZDataManager.getDataManager().getAllObject3D()) {
-			obj.draw(gl);
+		try {
+			for (ZObject3D obj : ZDataManager.getDataManager().getAllObject3D()) {
+				obj.draw(gl);
+			}
 		}
-//		int count = 0;
-//		for (Object obj:getToRenderObjs()) {
-//			if (obj instanceof ZObject3D) {
-//				ZObject3D obj3d = (ZObject3D)obj;
-//				obj3d.draw(gl);
-//				count ++;
-//			}
-//		}
-		//Log.d(TAG_LOG, "" + count + " meshes drawn.");
+		catch(ConcurrentModificationException e) {
+			// catch but not deal with it now..
+			Log.d(TAG_LOG, e.toString());
+		}
+
 	}
 	
 //	public void addMesh(Object obj) {

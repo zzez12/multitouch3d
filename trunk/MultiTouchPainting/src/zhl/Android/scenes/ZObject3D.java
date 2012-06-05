@@ -11,11 +11,11 @@ import javax.microedition.khronos.opengles.GL10;
 
 import zhl.Android.Multitouch.render.ZColor;
 import zhl.Android.Multitouch.render.ZProjector;
-import zhl.Android.Multitouch.render.ZView.EnumOperationMode;
 import zhl.Android.math.Matrix4f;
 import zhl.Android.math.Vector2f;
 import zhl.Android.math.Vector3f;
 import zhl.Android.math.Vector4f;
+import zhl.Android.scenes.ZAxis.AxisType;
 
 abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 	public static final String LOG_TAG = ZObject3D.class.getSimpleName();
@@ -123,6 +123,10 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 			return transformation_;
 		else
 			return this.parentObject_.transformation_.multiply(transformation_);
+	}
+	
+	public void setCurrentTransformation(Matrix4f mat) {
+		this.transformation_ = new Matrix4f(mat);
 	}
 	
 	public void setVertices(float [] vertices) {
@@ -341,7 +345,23 @@ abstract public class ZObject3D implements ZPickable3D, ZDrawable {
 	}
 	
 	public void addReferenceAxes(ZObject3D ref, boolean centerPivot) {
-		// TODO
+		// TODO untested!
+		// find the transformation matrix between the two objects' transformations
+		Matrix4f diffTransform = this.getTransformation().inverse().multiply(ref.getTransformation());
+		
+		Vector3f c = centerPivot ? diffTransform.multiply(ref.getObjCenter(), false) : this.getObjCenter();
+		AxisType t = centerPivot ? AxisType.ReferencePivotAxis : AxisType.ReferenceAxis;
+		
+		for (ZObject3D child:ref.getChildObjects()) {
+			if (child instanceof ZAxis) {
+				ZAxis axis = (ZAxis)child;
+				if (axis.getType()!=AxisType.ObjectAxis)
+					continue;
+				
+				ZAxis a1 = new ZAxis(c, diffTransform.multiply(axis.getDir(), true), ZColor.colorCyan, t);
+				this.addChildObject(a1);
+			}
+		}
 	}
 
 	public void addScreenAxes(ZProjector proj){

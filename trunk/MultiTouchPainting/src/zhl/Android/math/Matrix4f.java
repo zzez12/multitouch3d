@@ -109,6 +109,11 @@ public class Matrix4f {
 		return ret;
 	}
 	
+	public Vector3f multiply(Vector3f v, boolean bVector) {
+		Vector4f ret4f = this.multiply(new Vector4f(v, bVector?0.f:1.f));
+		return new Vector3f(ret4f.toArray(), 0);
+	}
+	
 	public Matrix4f preMultiply(Matrix4f m) {
 		Matrix4f ret = new Matrix4f();
 		for (int x=0; x<row_size_; x++)
@@ -128,6 +133,79 @@ public class Matrix4f {
 		for (int i=0; i<len_; i++)
 			ret.set(i, get(i)*f);
 		return ret;
+	}
+		
+	public float determinate() {
+		float a11 = e_[0];
+		float a12 = e_[1];
+		float a13 = e_[2];
+		float a14 = e_[3];
+		float a21 = e_[4];
+		float a22 = e_[5];
+		float a23 = e_[6];
+		float a24 = e_[7];
+		float a31 = e_[8];
+		float a32 = e_[9];
+		float a33 = e_[10];
+		float a34 = e_[11];
+		float a41 = e_[12];
+		float a42 = e_[13];
+		float a43 = e_[14];
+		float a44 = e_[15];
+		
+		float ret = a11*a22*a33*a44 + a11*a23*a34*a42 + a11*a24*a32*a43
+				  + a12*a21*a34*a43 + a12*a23*a31*a44 + a12*a24*a33*a41
+				  + a13*a21*a32*a44 + a13*a22*a34*a41 + a13*a24*a31*a42
+				  + a14*a21*a33*a42 + a13*a22*a31*a43 + a14*a23*a32*a41
+				  - a11*a22*a34*a43 - a11*a23*a32*a44 - a11*a24*a33*a42
+				  - a12*a21*a33*a44 - a12*a23*a34*a41 - a12*a24*a31*a43
+				  - a13*a21*a34*a42 - a13*a22*a31*a44 - a13*a24*a32*a41
+				  - a14*a21*a32*a43 - a14*a22*a33*a41 - a14*a23*a31*a42;
+		return ret;
+	}
+	
+	public Matrix4f inverse() {
+		float det = determinate();
+		if (det==0.f) throw new ArithmeticException();
+		
+		float a11 = e_[0];
+		float a12 = e_[1];
+		float a13 = e_[2];
+		float a14 = e_[3];
+		float a21 = e_[4];
+		float a22 = e_[5];
+		float a23 = e_[6];
+		float a24 = e_[7];
+		float a31 = e_[8];
+		float a32 = e_[9];
+		float a33 = e_[10];
+		float a34 = e_[11];
+		float a41 = e_[12];
+		float a42 = e_[13];
+		float a43 = e_[14];
+		float a44 = e_[15];
+
+		Matrix4f ret = new Matrix4f();
+		ret.set(0, 0, a22*a33*a44 + a23*a34*a42 + a24*a32*a43 - a22*a34*a43 - a23*a32*a44 - a24*a33*a42);
+		ret.set(0, 1, a12*a34*a43 + a13*a32*a44 + a14*a33*a42 - a12*a33*a44 - a13*a34*a42 - a14*a32*a43);
+		ret.set(0, 2, a12*a23*a44 + a13*a24*a42 + a14*a22*a43 - a12*a24*a43 - a13*a22*a44 - a14*a23*a42);
+		ret.set(0, 3, a12*a24*a33 + a13*a22*a34 + a14*a23*a32 - a12*a23*a34 - a13*a24*a32 - a14*a22*a33);
+		
+		ret.set(1, 0, a21*a34*a43 + a23*a31*a44 + a24*a33*a41 - a21*a33*a44 - a23*a34*a41 - a24*a31*a43);
+		ret.set(1, 1, a11*a33*a44 + a13*a34*a41 + a14*a31*a43 - a11*a34*a43 - a13*a31*a44 - a14*a33*a41);
+		ret.set(1, 2, a11*a24*a43 + a13*a21*a44 + a14*a23*a41 - a11*a23*a44 - a13*a24*a41 - a14*a21*a43);
+		ret.set(1, 3, a11*a23*a34 + a13*a24*a41 + a14*a21*a33 - a11*a24*a33 - a13*a21*a34 - a14*a23*a31);
+	
+		ret.set(2, 0, a21*a32*a44 + a22*a34*a41 + a24*a31*a42 - a21*a34*a42 - a22*a31*a44 - a24*a32*a41);
+		ret.set(2, 1, a11*a34*a42 + a12*a31*a44 + a14*a32*a41 - a11*a32*a44 - a12*a34*a41 - a14*a31*a42);
+		ret.set(2, 2, a11*a22*a44 + a12*a24*a41 + a14*a21*a42 - a11*a24*a42 - a12*a21*a44 - a14*a22*a41);
+		ret.set(2, 3, a11*a24*a32 + a12*a21*a34 + a14*a22*a31 - a11*a22*a34 - a12*a24*a31 - a14*a21*a32);
+		
+		ret.set(3, 0, a21*a33*a42 + a22*a31*a43 + a23*a32*a41 - a21*a32*a43 - a22*a33*a41 - a23*a31*a42);
+		ret.set(3, 1, a11*a32*a43 + a12*a33*a41 + a13*a31*a42 - a11*a33*a42 - a12*a31*a43 - a13*a32*a41);
+		ret.set(3, 2, a11*a23*a42 + a12*a21*a43 + a13*a22*a41 - a11*a22*a43 - a12*a23*a41 - a13*a21*a42);
+		ret.set(3, 3, a11*a22*a33 + a12*a23*a31 + a13*a21*a32 - a11*a23*a32 - a12*a21*a33 - a13*a22*a31);
+		return ret.times(1.f/det);
 	}
 	
 	public void set(int idx, float f) {
