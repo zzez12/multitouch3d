@@ -35,11 +35,13 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 	private ZObject3D touchObject_ = null;
 	private ZObject3D centerObject_ = null;
 	private ZTouchRecord globalRotationTouchRecord_ = null;
-	private boolean boundObject_ = false;
+//	private boolean boundObject_ = false;
 	
 	private ZView view_;
 	//private Matrix4f currTouchTransformation_ = Matrix4f.identityMatrix();
 	private HashSet<ZObject3D> selectedObjects_ = new HashSet<ZObject3D>();
+	
+	private int frameCount_ = 0;
 	
 	private boolean useSupportOpertaions_ = false;
 	private boolean useReferenceObjectCenter_ = false;
@@ -51,21 +53,33 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 	private ZObject3D referenceObject_ = null;
 
 	private boolean useGlobalAxes_;
-
 	private boolean useScreenAxes_;
 	
 	private ZLine3D tmpAxisLine = new ZLine3D();
 	private ZLine3D tmpAxisLine3D = new ZLine3D();
 	
+	// for user study
+	private boolean isTesting_ = false;
+	
 	public ZFingerRegisterListener(ZView view) {
 		this.view_ = view;
+	}
+	
+	public void resetAll() {
+		downObject_ = null;
+		focusObject_ = null;
+		touchObject_ = null;
+		centerObject_ = null;
+		selectedObjects_ = new HashSet<ZObject3D>();
+		referenceObject_ = null;
+		operationMode_ = EnumOperationMode.Unknown;
+		globalRotationTouchRecord_ = null;
 	}
 	
 	synchronized public void onGroupCreate(Object sender, ZTouchGroup group) {	
 	}
 
 	synchronized public void onGroupRemove(Object sender, ZTouchGroup group) {
-		// TODO Auto-generated method stub
 		//Log.d(LOG_TAG, "onGroupRemove()"  + currentStatus());
 		
 		/// global browsing
@@ -139,12 +153,11 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 
 	synchronized public void onGroupMove(Object sender, ZTouchGroup group,
 			ZTouchRecord record) {
-		// TODO Auto-generated method stub
 		//Log.d(LOG_TAG, "onGroupMove()"  + currentStatus());
 		//Log.d(LOG_TAG, " group: " + group.currentStatus());
 		//if (record!=null) Log.d(LOG_TAG, " record:" + record.currentStatus());
 		
-		/// start global rotation
+		//[start] start global rotation
 		if (operationMode_ == EnumOperationMode.Unknown
 			&& group.oldTouchRecords_.size()==0
 			&& group.touchRecords_.size()==1
@@ -165,9 +178,10 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			
 			return;
 		}
+		//[end]
 		
-		/// global browsing
-		// +global rotation
+		//[start] global browsing
+		//[start] +global rotation
 		if (operationMode_ == EnumOperationMode.GlobalRotation
 			&& record != null
 			&& record == globalRotationTouchRecord_) {
@@ -175,21 +189,27 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			view_.getTrackball().drag(p);
 			return;
 		}
-		// +global panning
+		//[end] +global rotation
+		
+		//[start] +global panning
 		if (operationMode_ == EnumOperationMode.GlobalPan
 			&& group.oldTouchRecords_.size()==0) {
 			Vector2f p = new Vector2f(group.cx_, view_.getHeight()-group.cy_);
 			view_.getTrackball().drag(p.times(3.f/view_.getViewportScaleRatio()));
 			return;
 		}
-		// +global zooming
+		//[end]
+		
+		//[start] +global zooming
 		if (operationMode_ == EnumOperationMode.GlobalZoom
 			&& group.oldTouchRecords_.size()==0) {
 			Vector2f p = new Vector2f(group.scalingRatio_, 0.f).times(view_.getWidth());
 			view_.getTrackball().drag(p); 
 			return;
 		}
-		// +axis/planner transformation
+		//[end]
+		
+		//[start] +axis/planner transformation
 		// compute centers
 		Vector2f c1 = new Vector2f();
 		Vector2f c2 = new Vector2f();
@@ -200,16 +220,16 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		c1 = c1.divide(group.touchRecords_.size());
 		c2 = c2.divide(group.touchRecords_.size());
 		// compute average distance to centers
-		float d1 = 0.f;
-		float d2 = 0.f;
-		for (ZTouchRecord rec : group.touchRecords_) {
-			d1 += new Vector2f(rec.downX_, rec.downY_).minus(c1).length();
-			d2 += new Vector2f(rec.x_, rec.y_).minus(c2).length();
-		}
-		d1 /= group.touchRecords_.size();
-		d2 /= group.touchRecords_.size();
+//		float d1 = 0.f;
+//		float d2 = 0.f;
+//		for (ZTouchRecord rec : group.touchRecords_) {
+//			d1 += new Vector2f(rec.downX_, rec.downY_).minus(c1).length();
+//			d2 += new Vector2f(rec.x_, rec.y_).minus(c2).length();
+//		}
+//		d1 /= group.touchRecords_.size();
+//		d2 /= group.touchRecords_.size();
 		
-		// planner translation
+		//[start] planner translation
 		if (operationMode_ == EnumOperationMode.PlannerTranslation
 			&& group.oldTouchRecords_.size()==0) {
 			// get translation scale
@@ -254,8 +274,10 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			//this.currTouchTransformation_  = tran;
 			return;
 		}
+		//[end]
+		//[end]
 		
-		/// planner scaling
+		//[start] planner scaling
 		if (operationMode_ == EnumOperationMode.PlannerScaling
 			&& group.oldTouchRecords_.size()==0) {
 			// get scaling scale
@@ -300,8 +322,9 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			//this.currTouchTransformation_ = tran;
 			return;
 		}
+		//[end]
 		
-		/// axis translation
+		//[start] axis translation
 		if (operationMode_ == EnumOperationMode.Translation
 			&& focusObject_ != null && focusObject_.getSelectedAxis()!=null
 			&& group.oldTouchRecords_.size()==0) {
@@ -328,8 +351,9 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			//this.currTouchTransformation_ = tran;
 			return;
 		}
+		//[end]
 		
-		/// axis rotation
+		//[start] axis rotation
 		if (operationMode_ == EnumOperationMode.Rotation
 			&& group.oldTouchRecords_.size()==0) {
 			ZAxis axis = focusObject_.getSelectedAxis();
@@ -356,8 +380,9 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			//this.currTouchTransformation_ = tran;
 			return;
 		}
+		//[end]
 		
-		/// axis scaling
+		//[start] axis scaling
 		if (operationMode_ == EnumOperationMode.Scaling
 			&& group.oldTouchRecords_.size() ==0) {
 			// get scaling scale
@@ -391,8 +416,9 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			//this.currTouchTransformation_ = tran;
 			return;
 		}
+		//[end]
 		
-		/// object uniform scaling
+		//[start] object uniform scaling
 		if (operationMode_ == EnumOperationMode.UniformScale
 			&& group.oldTouchRecords_.size()==0) {
 			// get scaling scale
@@ -413,11 +439,11 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			focusObject_.setTmpTransformation(tran);
 			// get matrix
 		}
+		//[end]
 	}
 
 	synchronized public void onGroupLongMove(Object sender, ZTouchGroup group,
 			ZTouchRecord record) {
-		// TODO Auto-generated method stub
 		Log.d(LOG_TAG, "onGroupLongMove()"  + currentStatus());
 		//Log.d(LOG_TAG, " group: " + group.currentStatus());
 		//if (record!=null) Log.d(LOG_TAG, " record:" + record.currentStatus());
@@ -541,6 +567,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 			p = p.times(view_.getWidth());
 			view_.getTrackball().click(p, Trackball.MotionType.Scale);
 			operationMode_ = EnumOperationMode.GlobalZoom;
+			view_.setToolTipText(operationMode_.toString());
 			
 			// hide axes
 			if (focusObject_ != null) {
@@ -814,7 +841,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 
 	synchronized public void onGroupHold(Object sender, ZTouchGroup group) {
 		// TODO Auto-generated method stub
-		//Log.d(LOG_TAG, "onGroupHold()"  + currentStatus());
+		Log.d(LOG_TAG, "onGroupHold()"  + currentStatus());
 		view_.setToolTipText(group.touchRecords_.size() + " finger(s) hold");
 		
 		// pick reference object
@@ -933,6 +960,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		// TODO Auto-generated method stub
 		//Log.d(LOG_TAG, "onGroupRemovePoint()");
 	}
+
 	
 	private boolean checkTransformation(Matrix4f tran) {
 		float f1 = tran.get(1);
@@ -955,7 +983,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		if (useGlobalAxes_) obj.addGlobalAxes();
 		if (useScreenAxes_) obj.addScreenAxes(view_.getProjector());
 		if (referenceObject_ != null) {
-			obj.addReferenceAxes(referenceObject_, false);
+			obj.addReferenceAxes(referenceObject_, this.useReferenceObjectCenter_);
 		}
 		obj.showAxes();
 	}
@@ -1181,6 +1209,7 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 	
 	private String currentStatus() {
 		String str = "";
+		str += " UseRefCenter: " + this.useReferenceObjectCenter_;
 		str += " Mode:" + this.operationMode_;
 		str += " crtObj: " + this.focusObject_;
 		str += " downObj: " + this.downObject_;
@@ -1188,7 +1217,6 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 	}
 
 	public ZView getView() {
-//		 TODO Auto-generated method stub
 		return view_;
 	}
 
@@ -1197,5 +1225,69 @@ public class ZFingerRegisterListener implements ZFingerRegister.FingerRegisterLi
 		tmpAxisLine.draw(gl);
 		tmpAxisLine3D.draw(gl);
 		gl.glPopMatrix();
+	}
+
+	private boolean moveToScreenCenter(ZObject3D obj) {
+		int w = view_.getWidth();
+		int h = view_.getHeight();
+		
+		Vector3f c = obj.getObjCenter();
+		Vector3f p = view_.getProjector().project(c);
+		Vector2f diff = new Vector2f(w*0.5f-p.x_, h*0.5f-p.y_);
+		float len = diff.length();
+		
+		if (len<1.f) return false;
+		if (len>50.f) diff = diff.times(50.f/len);
+		
+		Trackball ball = new Trackball(w, h);
+		ball.click(new Vector2f(0,0), Trackball.MotionType.Pan);
+		ball.drag(diff.times(1.f/view_.getViewportScaleRatio()));
+		Matrix4f m = ball.getMatrix();
+		view_.getRenderer().updateProjector(m);
+		
+		return false;
+	}
+
+	public void onTimerTick(Object sender) {
+		if (isTesting_ && ZDataManager.getDataManager().getAllObject3D().size()==2) {
+			// TODO
+		}
+		
+		// increase frame counter
+		frameCount_ ++;
+		if (frameCount_ >= 30000) frameCount_ = 0;
+		
+		if (sender instanceof ZFingerRegister) {
+			// update finger register for checking holding events
+			ZFingerRegister fingerRegister = (ZFingerRegister)sender;
+			fingerRegister.updateHoldTime();
+			fingerRegister.updateSpeed();
+			
+			// increase axis hold time
+			if (this.operationMode_ == EnumOperationMode.Unknown
+				&& this.focusObject_ != null
+				&& this.focusObject_.getSelectedAxis() != null
+				&& fingerRegister.getTouchRecords().size()==2) {
+				this.axisHoldCount_ ++;
+				if (axisHoldCount_ == axisHoldThreshold_) {
+					this.focusObject_.setFinishedAxisSelection(true);
+				}
+				view_.setToolTipText("count: " + axisHoldCount_);
+				//float sp = fingerRegister.getTouchRecords().
+			}		
+			
+			// scale globally if mouse wheel is using
+			// TODO ...
+			
+			// move current object to center
+			if (centerObject_ != null) {
+				if (moveToScreenCenter(centerObject_)==false) {
+					centerObject_ = null;
+				}
+			}
+			
+			// refresh window if needed
+			// TODO
+		}
 	}
 }

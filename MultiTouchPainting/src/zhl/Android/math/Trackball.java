@@ -59,7 +59,7 @@ public class Trackball {
 		float epsilon = (float) 1.0e-5;
 		Vector3f prep = stVec_.cross(edVec_);
 		if (prep.length()>epsilon)
-			this.quat_ = new Vector4f(prep, this.stVec_.dot(this.edVec_));
+			this.quat_ = new Vector4f(prep, stVec_.dot(edVec_));
 		else
 			this.quat_ = new Vector4f();
 	}
@@ -117,24 +117,13 @@ public class Trackball {
 		v.y_ = (h_ - pt.y_) * adjustHeight_;
 
 		double lenSq = v.dot(v);
-		/*
-		if (lenSq > 1.0)
-		{
-			double norm = 1.0 / Math.Sqrt(lenSq);
-			return new Vector3d(v.x * norm, v.y * norm, 0);
-		}
-		else
-		{
-			return new Vector3d(v.x, v.y, Math.Sqrt(1.0 - lenSq));
-		}
-		*/
-		if (lenSq > 1.0)
+		if (lenSq > 1.f)
 		{
 			v = v.normalize();
 			return new Vector3f(v.x_, v.y_, 0);
 		}
 		else
-			return new Vector3f(v.x_, v.y_, (float)Math.sqrt(1.0 - lenSq));
+			return new Vector3f(v.x_, v.y_, (float)Math.sqrt(1.f - lenSq));
 	}
 	
 	private Matrix3f quatToMatrix3f(Vector4f q) {
@@ -151,15 +140,15 @@ public class Trackball {
         yy = q.y_ * ys; yz = q.y_ * zs; zz = q.z_ * zs;
 
         Matrix3f m = new Matrix3f();
-        m.set(0, 0, 1.f - (yy + zz));
-        m.set(1, 0, xy - wz);
-        m.set(2, 0, xz + wy);
-        m.set(0, 1, xy + wz);
-        m.set(1, 1, 1.f - (xx + zz));
-        m.set(2, 1, yz - wx);
-        m.set(0, 2, xz - wy);
-        m.set(1, 2, yz + wx);
-        m.set(2, 2, 1.f - (xx + yy));
+        m.set(0, 0, 1.f - (yy + zz)*2.f);
+        m.set(1, 0, (xy - wz)*2.f);
+        m.set(2, 0, (xz + wy)*2.f);
+        m.set(0, 1, (xy + wz)*2.f);
+        m.set(1, 1, 1.f - (xx + zz)*2.f);
+        m.set(2, 1, (yz - wx)*2.f);
+        m.set(0, 2, (xz - wy)*2.f);
+        m.set(1, 2, (yz + wx)*2.f);
+        m.set(2, 2, 1.f - (xx + yy)*2.f);
         return m;
 	}
 	

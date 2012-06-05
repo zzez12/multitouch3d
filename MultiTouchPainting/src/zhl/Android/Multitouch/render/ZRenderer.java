@@ -47,7 +47,7 @@ public class ZRenderer implements GLSurfaceView.Renderer {
 	}
 
 
-	public void onDrawFrame(GL10 gl) {
+	synchronized public void onDrawFrame(GL10 gl) {
 		//Log.d(LOG_TAG, "onDrawFrame()");
 		setGL(gl);
 		start3DRendering(gl);
@@ -221,6 +221,13 @@ public class ZRenderer implements GLSurfaceView.Renderer {
 		Matrix4f oldM = new Matrix4f(getProjector().getModelM());
 		getProjector().setModelM(tb.getMatrix().multiply(oldM.transpose()).transpose().toArray());
 		//tb.end();
+	}
+	
+	// this function is for moving the camera to some other places
+	// please see also ZFingerRegisterListener.moveToScreenCenter()
+	public void updateProjector(Matrix4f trans) {
+		Matrix4f oldM = new Matrix4f(getProjector().getModelM());
+		getProjector().setModelM(trans.multiply(oldM.transpose()).transpose().toArray());
 	}
 	
 	public void endTransformation() {

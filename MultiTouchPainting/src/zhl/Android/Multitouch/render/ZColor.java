@@ -6,6 +6,7 @@ public class ZColor {
 	public static final float [] colorBlue = {0.f, 0.f, 1.f, 1.f};
 	public static final float [] colorWhite = {1.f, 1.f, 1.f, 1.f};
 	public static final float [] colorBlack = {0.f, 0.f, 0.f, 1.f};
+	public static final float [] colorCyan = {32.f/255.f, 178.f/255.f, 170.f/255.f, 1.f};
 	public static final float [][] colorTable = {colorBlack, colorWhite, colorRed, colorGreen, colorBlue,
 		{0.3f, 0.3f, 0.f, 1.f}, {0.f, 0.3f, 0.3f, 1.f} };
 	public static final float [] colorGray = {0.5f, 0.5f, 0.5f, 1.f};

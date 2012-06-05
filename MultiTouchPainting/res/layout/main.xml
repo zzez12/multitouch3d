@@ -30,7 +30,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:text="TextView" />
+        android:text="" />
 
     <zhl.Android.Multitouch.render.ZView
         android:id="@+id/zView1"
@@ -38,8 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/tvToolTip"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/bnReset"
-        android:layout_weight="0.75" />
+        android:layout_below="@+id/bnReset" />
 
     <ImageButton
         android:id="@+id/imaBnCube"

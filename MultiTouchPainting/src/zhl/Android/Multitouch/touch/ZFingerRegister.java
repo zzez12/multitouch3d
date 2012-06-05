@@ -42,6 +42,7 @@ public class ZFingerRegister {
 		void onGroupAddPoint(Object sender, ZTouchGroup group, ZTouchRecord record);
 		void onGroupRemovePoint(Object sender, ZTouchGroup group, ZTouchRecord record);
 		void onDraw(GL10 gl);
+		void onTimerTick(Object sender);
 		ZView getView();
 	}
 	
@@ -83,11 +84,15 @@ public class ZFingerRegister {
 		}
 		public void onDraw(GL10 gl) {}
 		public ZView getView() {return null;}
+		public void onTimerTick(Object sender) {
+			Log.d(LOG_TAG, "onTimerTick");
+		}
 	}
 	
 	private ZDisk2D disk2DObj_ = new ZDisk2D(20, 30, 30, 1);
 	
 	private FingerRegisterListener listener_;
+	private ZTimer timer_;
 	private Context context_;
 	/*
 	 * Set of all active touch records, indexed with the record id.
@@ -140,12 +145,22 @@ public class ZFingerRegister {
 	
 	public ZFingerRegister(Context context, ZFingerRegisterListener listener) {
 		this.context_ = context;
+		initTimer();
 		if (listener==null) {
 			this.listener_ = new EmptyFingerRegisterListener();
 		} else {
 			this.listener_ = listener;
 		}
 		//disk2DObj_.buildMeshData();
+	}
+	
+	private void initTimer() {
+		final ZFingerRegister thisPointer = this;
+		timer_ = new ZTimer(new ZTimer.ZTimerTick() {
+			public void onTimerTick() {
+				listener_.onTimerTick(thisPointer);
+			}
+		});
 	}
 	
 	synchronized public void addTouchPoint(int id, float x, float y) {
@@ -544,7 +559,7 @@ public class ZFingerRegister {
 	private boolean bDetectFingers_ = false;	// this is not supported now
 	private float fDistanceRatio_ = 1.2f;
 	private ZTouchGroup lastTag_ = null;
-	private ZTimer timer_ = new ZTimer();
+//	private ZTimer timer_ = new ZTimer();
 
 
 	synchronized public boolean onTouchEvent(MotionEvent event) {
